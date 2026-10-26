@@ -74,6 +74,7 @@ header {
   transition: height 0.2s ease;
 }
 
+/* 畳んだ時に完全に入力欄が見える高さ（48px）に修正 */
 #chat-wrapper.collapsed {
   height: 48px !important;
 }
