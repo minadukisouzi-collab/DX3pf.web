@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DX3rd Online Session Platform</title>
+  <style>
+    :root {
+      --bg-main: #0b0d12;
+      --bg-card: #161b22;
+      --bg-header: #1f242d;
+      --accent-red: #e63946;
+      --accent-blue: #457b9d;
+      --accent-purple: #7209b7;
+      --accent-gold: #f1c40f;
+      --text-main: #f1faee;
+      --text-muted: #a8dadc;
+      --border-color: #2a2f3a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    #app-container {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100dvh;
+    }
+
+    header {
+      background: var(--bg-header);
+      border-bottom: 2px solid var(--accent-red);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 10;
+      flex-wrap: wrap;
+      min-height: 52px;
+    }
+
+    .title-logo {
+      font-weight: bold;
+      color: var(--accent-red);
+      font-size: 1.1rem;
+    }
+
+    .timeline-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .timeline-item {
+      background: var(--bg-card);
+      padding: 3px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .btn:hover { opacity: 0.8; }
+    .btn-red { background: var(--accent-red); }
+    .btn-purple { background: var(--accent-purple); }
+    .btn-gold { background: #d4ac0d; color: #000; font-weight: bold; }
+
+    #main-content {
+      display: flex;
+      flex: 1;
+      height: calc(100dvh - 52px);
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    #char-sidebar {
+      width: 320px;
+      max-width: 40vw;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 5;
+    }
+
+    .sidebar-section {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .char-card {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .char-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .char-name { font-weight: bold; font-size: 0.95rem; color: #fff; }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      font-size: 0.8rem;
+    }
+
+    .stat-row input[type="number"] {
+      width: 44px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 2px;
+      border-radius: 3px;
+      text-align: right;
+    }
+
+    .bs-icon-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-top: 6px;
+    }
+
+    .bs-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 5px;
+      font-size: 0.65rem;
+      border-radius: 3px;
+      background: #2b2d42;
+      border: 1px solid #4a4e69;
+      color: #edf2f4;
+    }
+    .bs-badge.type-hard { border-color: #d4a373; }
+    .bs-badge.type-pressure { border-color: #8d99ae; }
+    .bs-badge.type-poison { border-color: #52b788; }
+    .bs-badge.type-hatred { border-color: #b5179e; }
+    .bs-badge.type-distracted { border-color: #48cae4; }
+    .bs-badge.type-berserk { border-color: #e63946; font-weight: bold; }
+
+    #center-right-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #board-wrapper {
+      flex: 1;
+      position: relative;
+      background: #050608;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    #board-viewport {
+      position: absolute;
+      top: 0; left: 0;
+      width: 2000px; height: 2000px;
+      transform-origin: 0 0;
+      background-image: radial-gradient(#2a2f3a 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .token {
+      position: absolute;
+      cursor: move;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+    }
+    .token-name {
+      background: rgba(0,0,0,0.75);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .board-controls {
+      position: absolute;
+      top: 10px; right: 10px;
+      display: flex; gap: 5px; z-index: 8;
+    }
+
+    #chat-wrapper {
+      height: 220px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      z-index: 6;
+    }
+
+    .chat-tabs {
+      display: flex;
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .chat-tab {
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-right: 1px solid var(--border-color);
+    }
+    .chat-tab.active {
+      background: var(--bg-card);
+      color: var(--accent-red);
+      font-weight: bold;
+    }
+
+    #chat-logs {
+      flex: 1;
+      padding: 6px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .log-item {
+      padding: 2px 4px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.03);
+    }
+    .log-name { font-weight: bold; color: var(--accent-blue); margin-right: 4px; }
+
+    .chat-input-area {
+      padding: 6px;
+      display: flex;
+      gap: 4px;
+      background: var(--bg-header);
+    }
+    .chat-input-area input[type="text"] {
+      flex: 1;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 450px; max-width: 90vw;
+      padding: 14px;
+    }
+
+    .bs-toggle-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .bs-toggle-btn {
+      padding: 6px;
+      font-size: 0.7rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      text-align: center;
+      color: #fff;
+    }
+    .bs-toggle-btn.active {
+      background: var(--accent-red);
+      border-color: var(--accent-red);
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      #main-content { flex-direction: column; }
+      #char-sidebar { width: 100vw; max-width: 100vw; height: 32dvh; }
+      #center-right-area { height: 68dvh; }
+      #chat-wrapper { height: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+  <header>
+    <div class="title-logo">DX3rd VTT</div>
+    <div class="timeline-bar">
+      <div class="timeline-item">
+        <span>Phase:</span>
+        <select id="phase-select" style="background:transparent; color:#fff; border:none;">
+          <option>オープニング</option>
+          <option>ミドル</option>
+          <option>クライマックス</option>
+        </select>
+      </div>
+      <div class="timeline-item">
+        <span>Scene:</span> <input type="number" id="scene-num" value="1" style="width:30px; background:transparent; color:#fff; border:none;">
+      </div>
+      <div class="timeline-item">
+        <span>Round:</span> <input type="number" id="round-num" value="1" style="width:30px; background:transparent; color:#fff; border:none;">
+      </div>
+      <div class="timeline-item">
+        <span style="color:var(--accent-gold); font-weight:bold;">Proc:</span>
+        <span id="current-process-text" style="color:#fff;">セットアップ</span>
+      </div>
+      <div id="process-control-buttons"></div>
+    </div>
+  </header>
+
+  <div id="main-content">
+    <div id="char-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">
+          <span>キャラクター一覧</span>
+          <button class="btn" onclick="addCharacter()">+ 追加</button>
+        </div>
+        <div id="character-list"></div>
+      </div>
+    </div>
+
+    <div id="center-right-area">
+      <div id="board-wrapper">
+        <div class="board-controls">
+          <button class="btn" onclick="zoomBoard(0.1)">＋</button>
+          <button class="btn" onclick="zoomBoard(-0.1)">－</button>
+          <button class="btn" onclick="resetBoardView()">リセット</button>
+        </div>
+        <div id="board-viewport"></div>
+      </div>
+
+      <div id="chat-wrapper">
+        <div class="chat-tabs">
+          <div class="chat-tab active">メイン</div>
+          <div class="chat-tab">雑談</div>
+          <div class="chat-tab">情報</div>
+        </div>
+        <div id="chat-logs">
+          <div class="log-item"><span class="log-name">[SYSTEM]</span>ルームへようこそ。ダイス例: 8dx+2@8</div>
+        </div>
+        <div class="chat-input-area">
+          <select id="chat-speaker-select" style="background:#0b0d12; color:#fff; border:1px solid #2a2f3a; border-radius:4px; max-width:90px;">
+            <option value="GM">GM</option>
+          </select>
+          <input type="text" id="chat-input" placeholder="例: 7dx+3@8 または メッセージ" onkeydown="if(event.key==='Enter') sendMessage()">
+          <button class="btn btn-red" onclick="sendMessage()">送信</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="gm-modal">
+  <div class="modal-card">
+    <div style="font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between;">
+      <span id="modal-char-name">BS編集</span>
+      <button class="btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="bs-toggle-grid" id="modal-bs-grid"></div>
+    <div style="margin-top:12px; text-align:right;">
+      <button class="btn btn-red" onclick="closeModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ALL_BAD_STATUSES = [
+    { id: 'hard', name: '硬直', type: 'type-hard' },
+    { id: 'pressure', name: '重圧', type: 'type-pressure' },
+    { id: 'poison', name: '邪毒', type: 'type-poison' },
+    { id: 'hatred', name: '憎悪', type: 'type-hatred' },
+    { id: 'distracted', name: '放心', type: 'type-distracted' },
+    { id: 'berserk', name: '暴走', type: 'type-berserk' },
+    { id: 'mut_liberation', name: '変異:解放', type: 'type-berserk' },
+    { id: 'mut_slaughter', name: '変異:殺戮', type: 'type-berserk' },
+    { id: 'mut_fear', name: '変異:恐怖', type: 'type-berserk' }
+  ];
+
+  let characters = [
+    { id: 'c1', name: '綾瀬 友歌', hp: 30, maxHp: 30, erosion: 80, initiative: 12, badStatuses: ['pressure'] },
+    { id: 'c2', name: '鷹司 秀一', hp: 35, maxHp: 35, erosion: 102, initiative: 8, badStatuses: ['hard'] }
+  ];
+
+  let currentTiming = 'setup';
+  let activeCharIndex = 0;
+  let boardState = { scale: 1, panX: 0, panY: 0, isDragging: false, startX: 0, startY: 0 };
+  let tokens = [
+    { id: 't1', charId: 'c1', name: '綾瀬 友歌', x: 100, y: 100, color: '#457b9d' },
+    { id: 't2', charId: 'c2', name: '鷹司 秀一', x: 220, y: 150, color: '#e63946' }
+  ];
+  let selectedModalCharId = null;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      renderCharacters();
+      renderTokens();
+      initBoardPanAndZoom();
+      updateProcessUI();
+    } catch(e) {
+      console.error(e);
+    }
+  });
+
+  function renderCharacters() {
+    const listEl = document.getElementById('character-list');
+    const speakerSelect = document.getElementById('chat-speaker-select');
+    if (!listEl || !speakerSelect) return;
+
+    listEl.innerHTML = '';
+    speakerSelect.innerHTML = '<option value="GM">GM</option>';
+
+    characters.forEach(c => {
+      let diceBonus = c.erosion >= 200 ? 4 : (c.erosion >= 160 ? 3 : (c.erosion >= 100 ? 2 : (c.erosion >= 80 ? 1 : 0)));
+      
+      const bsBadgesHtml = c.badStatuses.map(bsId => {
+        const bs = ALL_BAD_STATUSES.find(b => b.id === bsId);
+        return bs ? `<span class="bs-badge ${bs.type}">${bs.name}</span>` : '';
+      }).join('');
+
+      const card = document.createElement('div');
+      card.className = 'char-card';
+      card.innerHTML = `
+        <div class="char-header">
+          <span class="char-name">${c.name}</span>
+          <button class="btn btn-purple" style="font-size:0.65rem;" onclick="openGMModal('${c.id}')">BS編集</button>
+        </div>
+        <div class="stat-row">
+          <span>HP:</span><input type="number" value="${c.hp}" onchange="updateStat('${c.id}', 'hp', this.value)">/${c.maxHp}
+          <span>侵蝕:</span><input type="number" value="${c.erosion}" onchange="updateStat('${c.id}', 'erosion', this.value)">%
+          <span>行動:</span><input type="number" value="${c.initiative}" onchange="updateStat('${c.id}', 'initiative', this.value)">
+        </div>
+        <div class="bs-icon-container">${bsBadgesHtml || '<span style="font-size:0.65rem; color:#666;">BSなし</span>'}</div>
+      `;
+      listEl.appendChild(card);
+
+      const opt = document.createElement('option');
+      opt.value = c.name; opt.textContent = c.name;
+      speakerSelect.appendChild(opt);
+    });
+  }
+
+  function updateStat(id, key, val) {
+    const char = characters.find(c => c.id === id);
+    if (char) { char[key] = parseInt(val, 10) || 0; renderCharacters(); }
+  }
+
+  function addCharacter() {
+    const name = prompt('キャラクター名を入力してください:', '新規PC');
+    if (name) {
+      const newId = 'c' + (characters.length + 1);
+      characters.push({ id: newId, name: name, hp: 30, maxHp: 30, erosion: 60, initiative: 10, badStatuses: [] });
+      tokens.push({ id: 't' + newId, charId: newId, name: name, x: 150, y: 150, color: '#7209b7' });
+      renderCharacters();
+      renderTokens();
+    }
+  }
+
+  function openGMModal(charId) {
+    selectedModalCharId = charId;
+    const char = characters.find(c => c.id === charId);
+    if (!char) return;
+    document.getElementById('modal-char-name').textContent = `${char.name} - BS編集`;
+    const grid = document.getElementById('modal-bs-grid');
+    grid.innerHTML = '';
+    ALL_BAD_STATUSES.forEach(bs => {
+      const isActive = char.badStatuses.includes(bs.id);
+      const btn = document.createElement('div');
+      btn.className = `bs-toggle-btn ${isActive ? 'active' : ''}`;
+      btn.textContent = bs.name;
+      btn.onclick = () => {
+        const idx = char.badStatuses.indexOf(bs.id);
+        if (idx >= 0) char.badStatuses.splice(idx, 1);
+        else char.badStatuses.push(bs.id);
+        openGMModal(charId);
+        renderCharacters();
+      };
+      grid.appendChild(btn);
+    });
+    document.getElementById('gm-modal').classList.add('active');
+  }
+
+  function closeModal() { document.getElementById('gm-modal').classList.remove('active'); }
+
+  function updateProcessUI() {
+    const textEl = document.getElementById('current-process-text');
+    const btnsEl = document.getElementById('process-control-buttons');
+    if (!textEl || !btnsEl) return;
+    btnsEl.innerHTML = '';
+
+    if (currentTiming === 'setup') {
+      textEl.textContent = 'セットアップ';
+      btnsEl.innerHTML = `<button class="btn btn-gold" onclick="transitionTo('initiative')">イニシアチブへ➔</button>`;
+    } else if (currentTiming === 'initiative') {
+      textEl.textContent = 'イニシアチブ';
+      btnsEl.innerHTML = `<button class="btn btn-gold" onclick="transitionTo('main_minor')">メインへ➔</button>`;
+    } else if (currentTiming === 'main_minor') {
+      textEl.textContent = 'メイン(マイナー)';
+      btnsEl.innerHTML = `<button class="btn btn-red" onclick="transitionTo('main_major')">メジャーへ➔</button>`;
+    } else if (currentTiming === 'main_major') {
+      textEl.textContent = 'メイン(メジャー)';
+      btnsEl.innerHTML = `<button class="btn btn-red" onclick="finishMainAction()">行動終了➔</button>`;
+    } else if (currentTiming === 'cleanup') {
+      textEl.textContent = 'クリンナップ';
+      btnsEl.innerHTML = `<button class="btn btn-gold" onclick="transitionTo('setup')">次ラウンド➔</button>`;
+    }
+  }
+
+  function transitionTo(nextTiming) {
+    currentTiming = nextTiming;
+    appendLog('[SYSTEM]', `タイミング変更: ${nextTiming}`);
+    updateProcessUI();
+  }
+
+  function finishMainAction() {
+    activeCharIndex++;
+    if (activeCharIndex >= characters.length) {
+      activeCharIndex = 0;
+      transitionTo('cleanup');
+    } else {
+      transitionTo('initiative');
+    }
+  }
+
+  function initBoardPanAndZoom() {
+    const wrapper = document.getElementById('board-wrapper');
+    const viewport = document.getElementById('board-viewport');
+    if (!wrapper || !viewport) return;
+
+    wrapper.addEventListener('mousedown', (e) => {
+      if (e.target !== wrapper && e.target !== viewport) return;
+      boardState.isDragging = true;
+      boardState.startX = e.clientX - boardState.panX;
+      boardState.startY = e.clientY - boardState.panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!boardState.isDragging) return;
+      boardState.panX = e.clientX - boardState.startX;
+      boardState.panY = e.clientY - boardState.startY;
+      updateBoardTransform();
+    });
+
+    window.addEventListener('mouseup', () => { boardState.isDragging = false; });
+  }
+
+  function zoomBoard(delta) {
+    boardState.scale = Math.min(Math.max(0.4, boardState.scale + delta), 2.5);
+    updateBoardTransform();
+  }
+
+  function resetBoardView() {
+    boardState.scale = 1; boardState.panX = 0; boardState.panY = 0;
+    updateBoardTransform();
+  }
+
+  function updateBoardTransform() {
+    const vp = document.getElementById('board-viewport');
+    if (vp) vp.style.transform = `translate(${boardState.panX}px, ${boardState.panY}px) scale(${boardState.scale})`;
+  }
+
+  function renderTokens() {
+    const viewport = document.getElementById('board-viewport');
+    if (!viewport) return;
+    viewport.innerHTML = '';
+
+    tokens.forEach(t => {
+      const el = document.createElement('div');
+      el.className = 'token';
+      el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
+      el.innerHTML = `<div style="width:40px; height:40px; border-radius:50%; background:${t.color}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">${t.name[0]}</div><div class="token-name">${t.name}</div>`;
+      
+      let dragging = false, ox = 0, oy = 0;
+      el.addEventListener('mousedown', (e) => {
+        e.stopPropagation(); dragging = true;
+        ox = (e.clientX / boardState.scale) - t.x;
+        oy = (e.clientY / boardState.scale) - t.y;
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        t.x = (e.clientX / boardState.scale) - ox;
+        t.y = (e.clientY / boardState.scale) - oy;
+        el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
+      });
+      window.addEventListener('mouseup', () => { dragging = false; });
+      viewport.appendChild(el);
+    });
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const speaker = document.getElementById('chat-speaker-select').
