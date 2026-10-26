@@ -27,7 +27,7 @@ let isChatCollapsed = false;
 // フェーズ管理
 const PHASES = ['オープニングフェイズ', 'ミドルフェイズ', 'クライマックスフェイズ', 'エンディングフェイズ'];
 let currentPhaseIndex = 0;
-let isBattleMode = false; // 戦闘中フラグ
+let isBattleMode = false;
 let currentTiming = 'setup';
 let activeCharIndex = 0;
 
@@ -43,7 +43,7 @@ window.onload = function() {
     renderCharacters();
     renderTokens();
     initBoardPanAndZoom();
-    updateModeUI(); // ★ ここを正しく修正しました
+    updateModeUI();
     renderChatLogs();
   } catch(e) {
     console.error("初期化エラー:", e);
@@ -60,14 +60,12 @@ function updateModeUI() {
   modeControls.innerHTML = '';
 
   if (!isBattleMode) {
-    // 通常モード時のボタン
     modeControls.innerHTML = `
       <button class="btn" onclick="nextScene()">次のシーンへ</button>
       <button class="btn" onclick="nextPhase()">次のフェーズ</button>
       <button class="btn btn-gold" onclick="startBattle()">戦闘開始</button>
     `;
   } else {
-    // 戦闘モード時のプロセス進行UI
     modeControls.innerHTML = `
       <span style="color:var(--accent-gold); font-weight:bold; margin-left:4px;">Proc:</span>
       <span id="current-process-text" style="color:#fff; font-weight:bold;">セットアップ</span>
@@ -77,11 +75,10 @@ function updateModeUI() {
   }
 }
 
-// 次のフェーズへ（ループ ＆ シーン番号を強制的に1にリセット）
+// 次のフェーズへ（ループ ＆ シーン番号を 1 にリセット）
 function nextPhase() {
   currentPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
   
-  // シーン番号のinput要素の値を直接 1 に書き換える
   const sceneInput = document.getElementById('scene-num');
   if (sceneInput) {
     sceneInput.value = 1;
@@ -386,4 +383,28 @@ function renderTokens() {
     });
     window.addEventListener('mousemove', (e) => {
       if (!dragging) return;
-      t.x = (e.clientX / board
+      t.x = (e.clientX / boardState.scale) - ox;
+      t.y = (e.clientY / boardState.scale) - oy;
+      el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
+    });
+    window.addEventListener('mouseup', () => { dragging = false; });
+    viewport.appendChild(el);
+  });
+}
+
+function rollDX3(num, mod, crit) {
+  let cur = num, hist = [], total = 0, rerolls = 0;
+  if (crit < 2) crit = 2;
+  while (cur > 0) {
+    let rolls = [], next = 0;
+    for (let i = 0; i < cur; i++) {
+      let r = Math.floor(Math.random() * 10) + 1;
+      rolls.push(r);
+      if (r >= crit) next++;
+    }
+    hist.push(`[${rolls.join(',')}]`);
+    if (next > 0) { rerolls++; cur = next; }
+    else { total = (rerolls * 10) + Math.max(...rolls) + mod; break; }
+  }
+  return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
+}
