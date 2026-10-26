@@ -75,7 +75,7 @@ header {
 }
 
 #chat-wrapper.collapsed {
-  height: 38px !important;
+  height: 48px !important;
 }
 
 #chat-wrapper.collapsed #chat-logs {
