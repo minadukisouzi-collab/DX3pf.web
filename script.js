@@ -335,3 +335,71 @@ function rollDX3(num, mod, crit) {
   }
   return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
 }
+
+// フェーズの定義
+const PHASES = ['オープニングフェイズ', 'ミドルフェイズ', 'クライマックスフェイズ', 'エンディングフェイズ'];
+let currentPhaseIndex = 0;
+
+let isBattleMode = false; // 戦闘中かどうか
+
+// 初期化時にモード別UIを反映
+function updateModeUI() {
+  const modeControls = document.getElementById('mode-controls');
+  const phaseText = document.getElementById('current-phase-text');
+  if (!modeControls || !phaseText) return;
+
+  phaseText.textContent = PHASES[currentPhaseIndex];
+  modeControls.innerHTML = '';
+
+  if (!isBattleMode) {
+    // 通常モード
+    modeControls.innerHTML = `
+      <button class="btn" onclick="nextScene()">次のシーンへ</button>
+      <button class="btn" onclick="nextPhase()">次のフェーズ</button>
+      <button class="btn btn-gold" onclick="startBattle()">戦闘開始</button>
+    `;
+  } else {
+    // 戦闘モード
+    modeControls.innerHTML = `
+      <span style="color:var(--accent-gold); font-weight:bold; margin-left:4px;">Proc:</span>
+      <span id="current-process-text" style="color:#fff; font-weight:bold;">セットアップ</span>
+      <div id="process-control-buttons" style="display:flex; gap:3px; margin-left:4px;"></div>
+    `;
+    updateProcessUI();
+  }
+}
+
+// 次のフェーズへ（ループ）
+function nextPhase() {
+  currentPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
+  updateModeUI();
+  appendLog('[SYSTEM]', `フェーズが移行しました: 【${PHASES[currentPhaseIndex]}】`);
+}
+
+// 次のシーンへ（シーン番号インクリメント ＆ リザレクションサジェスト）
+function nextScene() {
+  const sceneInput = document.getElementById('scene-num');
+  if (sceneInput) {
+    let sc = parseInt(sceneInput.value, 10) || 1;
+    sceneInput.value = sc + 1;
+  }
+  appendLog('[SYSTEM]', `シーン ${sceneInput.value} に移行しました。`);
+  appendLog('[SYSTEM]', '【サジェスト】シーンが変わりました。必要に応じてロイスのタイタス昇華やリザレクション（侵蝕率上昇・HP回復）の処理を行ってください。');
+}
+
+// 戦闘開始
+function startBattle() {
+  isBattleMode = true;
+  currentTiming = 'setup';
+  updateModeUI();
+  appendLog('[SYSTEM]', '戦闘を開始します。イニシアチブおよびプロセス管理へ移行します。');
+}
+
+// 戦闘終了
+function endBattle() {
+  isBattleMode = false;
+  const roundInput = document.getElementById('round-num');
+  if (roundInput) roundInput.value = 1;
+  updateModeUI();
+  appendLog('[SYSTEM]', '戦闘が終了しました。通常モード（シーン・フェーズ管理）に戻ります。');
+}
