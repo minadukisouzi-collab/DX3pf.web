@@ -78,10 +78,18 @@ function updateModeUI() {
 }
 
 // 次のフェーズへ（ループ）
+// 次のフェーズへ（ループ ＆ シーン番号を1にリセット）
 function nextPhase() {
   currentPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
+  
+  // シーン番号を 1 にリセット
+  const sceneInput = document.getElementById('scene-num');
+  if (sceneInput) {
+    sceneInput.value = 1;
+  }
+
   updateModeUI();
-  appendLog('[SYSTEM]', `フェーズが移行しました: 【${PHASES[currentPhaseIndex]}】`);
+  appendLog('[SYSTEM]', `フェーズが移行しました: 【${PHASES[currentPhaseIndex]}】（シーン番号を 1 にリセットしました）`);
 }
 
 // 次のシーンへ（シーン番号インクリメント ＆ リザレクション確認サジェスト）
