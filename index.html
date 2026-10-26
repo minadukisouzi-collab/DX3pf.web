@@ -18,329 +18,83 @@
       --border-color: #2a2f3a;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      user-select: none;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      background-color: var(--bg-main);
-      color: var(--text-main);
-    }
-
-    #app-container {
-      display: flex;
-      flex-direction: column;
-      width: 100vw;
-      height: 100dvh;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; }
+    html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background-color: var(--bg-main); color: var(--text-main); }
+    #app-container { display: flex; flex-direction: column; width: 100vw; height: 100dvh; }
 
     header {
       background: var(--bg-header);
       border-bottom: 2px solid var(--accent-red);
-      padding: 6px 12px;
+      padding: 6px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       z-index: 10;
       flex-wrap: wrap;
       min-height: 52px;
     }
+    .title-logo { font-weight: bold; color: var(--accent-red); font-size: 1rem; }
+    .timeline-bar { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; flex-wrap: wrap; }
+    .timeline-item { background: var(--bg-card); padding: 3px 5px; border-radius: 4px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 3px; }
 
-    .title-logo {
-      font-weight: bold;
-      color: var(--accent-red);
-      font-size: 1.1rem;
-    }
-
-    .timeline-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .timeline-item {
-      background: var(--bg-card);
-      padding: 3px 6px;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn {
-      background: var(--accent-blue);
-      color: #fff;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
+    .btn { background: var(--accent-blue); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
     .btn:hover { opacity: 0.8; }
     .btn-red { background: var(--accent-red); }
     .btn-purple { background: var(--accent-purple); }
     .btn-gold { background: #d4ac0d; color: #000; font-weight: bold; }
 
-    #main-content {
-      display: flex;
-      flex: 1;
-      height: calc(100dvh - 52px);
-      width: 100vw;
-      overflow: hidden;
-    }
+    #main-content { display: flex; flex: 1; height: calc(100dvh - 52px); width: 100vw; overflow: hidden; }
+    #char-sidebar { width: 320px; max-width: 40vw; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; z-index: 5; }
+    .sidebar-section { padding: 8px; border-bottom: 1px solid var(--border-color); }
+    .sidebar-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
 
-    #char-sidebar {
-      width: 320px;
-      max-width: 40vw;
-      background: var(--bg-card);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      z-index: 5;
-    }
+    .char-card { background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px; margin-bottom: 6px; }
+    .char-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+    .char-name { font-weight: bold; font-size: 0.9rem; color: #fff; }
+    .stat-row { display: flex; align-items: center; gap: 4px; margin-top: 3px; font-size: 0.75rem; }
+    .stat-row input[type="number"] { width: 40px; background: var(--bg-main); border: 1px solid var(--border-color); color: #fff; padding: 2px; border-radius: 3px; text-align: right; }
 
-    .sidebar-section {
-      padding: 10px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .sidebar-title {
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .char-card {
-      background: rgba(0,0,0,0.25);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 8px;
-      margin-bottom: 8px;
-    }
-
-    .char-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-
-    .char-name { font-weight: bold; font-size: 0.95rem; color: #fff; }
-
-    .stat-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 4px;
-      font-size: 0.8rem;
-    }
-
-    .stat-row input[type="number"] {
-      width: 44px;
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 2px;
-      border-radius: 3px;
-      text-align: right;
-    }
-
-    .bs-icon-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3px;
-      margin-top: 6px;
-    }
-
-    .bs-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 5px;
-      font-size: 0.65rem;
-      border-radius: 3px;
-      background: #2b2d42;
-      border: 1px solid #4a4e69;
-      color: #edf2f4;
-    }
+    .bs-icon-container { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+    .bs-badge { display: inline-flex; align-items: center; padding: 1px 4px; font-size: 0.6rem; border-radius: 3px; background: #2b2d42; border: 1px solid #4a4e69; color: #edf2f4; }
     .bs-badge.type-hard { border-color: #d4a373; }
     .bs-badge.type-pressure { border-color: #8d99ae; }
     .bs-badge.type-poison { border-color: #52b788; }
-    .bs-badge.type-hatred { border-color: #b5179e; }
-    .bs-badge.type-distracted { border-color: #48cae4; }
     .bs-badge.type-berserk { border-color: #e63946; font-weight: bold; }
 
-    #center-right-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      height: 100%;
-      overflow: hidden;
-    }
+    #center-right-area { flex: 1; display: flex; flex-direction: column; position: relative; height: 100%; overflow: hidden; }
+    #board-wrapper { flex: 1; position: relative; background: #050608; overflow: hidden; cursor: grab; }
+    #board-viewport { position: absolute; top: 0; left: 0; width: 2000px; height: 2000px; transform-origin: 0 0; background-image: radial-gradient(#2a2f3a 1px, transparent 1px); background-size: 40px 40px; }
 
-    #board-wrapper {
-      flex: 1;
-      position: relative;
-      background: #050608;
-      overflow: hidden;
-      cursor: grab;
-    }
+    .token { position: absolute; cursor: move; display: flex; flex-direction: column; align-items: center; z-index: 2; }
+    .token-name { background: rgba(0,0,0,0.75); padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; margin-top: 2px; white-space: nowrap; }
 
-    #board-viewport {
-      position: absolute;
-      top: 0; left: 0;
-      width: 2000px; height: 2000px;
-      transform-origin: 0 0;
-      background-image: radial-gradient(#2a2f3a 1px, transparent 1px);
-      background-size: 40px 40px;
-    }
+    .board-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 8; }
 
-    .token {
-      position: absolute;
-      cursor: move;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      z-index: 2;
-    }
-    .token-name {
-      background: rgba(0,0,0,0.75);
-      padding: 1px 5px;
-      border-radius: 3px;
-      font-size: 0.75rem;
-      margin-top: 2px;
-      white-space: nowrap;
-    }
+    #chat-wrapper { height: 200px; background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 6; }
+    .chat-tabs { display: flex; background: var(--bg-header); border-bottom: 1px solid var(--border-color); }
+    .chat-tab { padding: 4px 8px; font-size: 0.7rem; cursor: pointer; border-right: 1px solid var(--border-color); }
+    .chat-tab.active { background: var(--bg-card); color: var(--accent-red); font-weight: bold; }
 
-    .board-controls {
-      position: absolute;
-      top: 10px; right: 10px;
-      display: flex; gap: 5px; z-index: 8;
-    }
-
-    #chat-wrapper {
-      height: 220px;
-      background: var(--bg-card);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      z-index: 6;
-    }
-
-    .chat-tabs {
-      display: flex;
-      background: var(--bg-header);
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .chat-tab {
-      padding: 5px 10px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      border-right: 1px solid var(--border-color);
-    }
-    .chat-tab.active {
-      background: var(--bg-card);
-      color: var(--accent-red);
-      font-weight: bold;
-    }
-
-    #chat-logs {
-      flex: 1;
-      padding: 6px;
-      overflow-y: auto;
-      font-size: 0.8rem;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .log-item {
-      padding: 2px 4px;
-      border-radius: 3px;
-      background: rgba(255,255,255,0.03);
-    }
+    #chat-logs { flex: 1; padding: 6px; overflow-y: auto; font-size: 0.75rem; display: flex; flex-direction: column; gap: 3px; }
+    .log-item { padding: 2px 4px; border-radius: 3px; background: rgba(255,255,255,0.03); }
     .log-name { font-weight: bold; color: var(--accent-blue); margin-right: 4px; }
 
-    .chat-input-area {
-      padding: 6px;
-      display: flex;
-      gap: 4px;
-      background: var(--bg-header);
-    }
-    .chat-input-area input[type="text"] {
-      flex: 1;
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 4px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-    }
+    .chat-input-area { padding: 6px; display: flex; gap: 4px; background: var(--bg-header); }
+    .chat-input-area input[type="text"] { flex: 1; background: var(--bg-main); border: 1px solid var(--border-color); color: #fff; padding: 4px; border-radius: 4px; font-size: 0.8rem; }
 
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal-overlay.active { display: flex; }
-
-    .modal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      width: 450px; max-width: 90vw;
-      padding: 14px;
-    }
-
-    .bs-toggle-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .bs-toggle-btn {
-      padding: 6px;
-      font-size: 0.7rem;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      text-align: center;
-      color: #fff;
-    }
-    .bs-toggle-btn.active {
-      background: var(--accent-red);
-      border-color: var(--accent-red);
-      font-weight: bold;
-    }
+    .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; width: 420px; max-width: 90vw; padding: 12px; }
+    .bs-toggle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 6px; }
+    .bs-toggle-btn { padding: 5px; font-size: 0.65rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 4px; text-align: center; color: #fff; }
+    .bs-toggle-btn.active { background: var(--accent-red); border-color: var(--accent-red); font-weight: bold; }
 
     @media (max-width: 768px) {
       #main-content { flex-direction: column; }
-      #char-sidebar { width: 100vw; max-width: 100vw; height: 32dvh; }
-      #center-right-area { height: 68dvh; }
-      #chat-wrapper { height: 160px; }
+      #char-sidebar { width: 100vw; max-width: 100vw; height: 30dvh; }
+      #center-right-area { height: 70dvh; }
+      #chat-wrapper { height: 150px; }
     }
   </style>
 </head>
@@ -358,17 +112,13 @@
           <option>クライマックス</option>
         </select>
       </div>
-      <div class="timeline-item">
-        <span>Scene:</span> <input type="number" id="scene-num" value="1" style="width:30px; background:transparent; color:#fff; border:none;">
-      </div>
-      <div class="timeline-item">
-        <span>Round:</span> <input type="number" id="round-num" value="1" style="width:30px; background:transparent; color:#fff; border:none;">
-      </div>
+      <div class="timeline-item"><span>Sc:</span> <input type="number" id="scene-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;"></div>
+      <div class="timeline-item"><span>Rd:</span> <input type="number" id="round-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;"></div>
       <div class="timeline-item">
         <span style="color:var(--accent-gold); font-weight:bold;">Proc:</span>
         <span id="current-process-text" style="color:#fff;">セットアップ</span>
       </div>
-      <div id="process-control-buttons"></div>
+      <div id="process-control-buttons" style="display:flex; gap:3px;"></div>
     </div>
   </header>
 
@@ -403,10 +153,10 @@
           <div class="log-item"><span class="log-name">[SYSTEM]</span>ルームへようこそ。ダイス例: 8dx+2@8</div>
         </div>
         <div class="chat-input-area">
-          <select id="chat-speaker-select" style="background:#0b0d12; color:#fff; border:1px solid #2a2f3a; border-radius:4px; max-width:90px;">
+          <select id="chat-speaker-select" style="background:#0b0d12; color:#fff; border:1px solid #2a2f3a; border-radius:4px; max-width:80px;">
             <option value="GM">GM</option>
           </select>
-          <input type="text" id="chat-input" placeholder="例: 7dx+3@8 または メッセージ" onkeydown="if(event.key==='Enter') sendMessage()">
+          <input type="text" id="chat-input" placeholder="ダイス例: 7dx+3@8 または メッセージ" onkeydown="if(event.key==='Enter') sendMessage()">
           <button class="btn btn-red" onclick="sendMessage()">送信</button>
         </div>
       </div>
@@ -416,12 +166,12 @@
 
 <div class="modal-overlay" id="gm-modal">
   <div class="modal-card">
-    <div style="font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between;">
+    <div style="font-weight:bold; margin-bottom:6px; display:flex; justify-content:space-between; font-size:0.85rem;">
       <span id="modal-char-name">BS編集</span>
       <button class="btn" onclick="closeModal()">✕</button>
     </div>
     <div class="bs-toggle-grid" id="modal-bs-grid"></div>
-    <div style="margin-top:12px; text-align:right;">
+    <div style="margin-top:10px; text-align:right;">
       <button class="btn btn-red" onclick="closeModal()">閉じる</button>
     </div>
   </div>
@@ -454,16 +204,17 @@
   ];
   let selectedModalCharId = null;
 
-  window.addEventListener('DOMContentLoaded', () => {
+  // 確実に実行させるため、ウィンドウ読み込み時に即時初期化
+  window.onload = function() {
     try {
       renderCharacters();
       renderTokens();
       initBoardPanAndZoom();
       updateProcessUI();
     } catch(e) {
-      console.error(e);
+      console.error("初期化エラー:", e);
     }
-  });
+  };
 
   function renderCharacters() {
     const listEl = document.getElementById('character-list');
@@ -474,8 +225,6 @@
     speakerSelect.innerHTML = '<option value="GM">GM</option>';
 
     characters.forEach(c => {
-      let diceBonus = c.erosion >= 200 ? 4 : (c.erosion >= 160 ? 3 : (c.erosion >= 100 ? 2 : (c.erosion >= 80 ? 1 : 0)));
-      
       const bsBadgesHtml = c.badStatuses.map(bsId => {
         const bs = ALL_BAD_STATUSES.find(b => b.id === bsId);
         return bs ? `<span class="bs-badge ${bs.type}">${bs.name}</span>` : '';
@@ -486,14 +235,14 @@
       card.innerHTML = `
         <div class="char-header">
           <span class="char-name">${c.name}</span>
-          <button class="btn btn-purple" style="font-size:0.65rem;" onclick="openGMModal('${c.id}')">BS編集</button>
+          <button class="btn btn-purple" style="font-size:0.6rem;" onclick="openGMModal('${c.id}')">BS編集</button>
         </div>
         <div class="stat-row">
           <span>HP:</span><input type="number" value="${c.hp}" onchange="updateStat('${c.id}', 'hp', this.value)">/${c.maxHp}
           <span>侵蝕:</span><input type="number" value="${c.erosion}" onchange="updateStat('${c.id}', 'erosion', this.value)">%
           <span>行動:</span><input type="number" value="${c.initiative}" onchange="updateStat('${c.id}', 'initiative', this.value)">
         </div>
-        <div class="bs-icon-container">${bsBadgesHtml || '<span style="font-size:0.65rem; color:#666;">BSなし</span>'}</div>
+        <div class="bs-icon-container">${bsBadgesHtml || '<span style="font-size:0.6rem; color:#666;">BSなし</span>'}</div>
       `;
       listEl.appendChild(card);
 
@@ -631,7 +380,7 @@
       const el = document.createElement('div');
       el.className = 'token';
       el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
-      el.innerHTML = `<div style="width:40px; height:40px; border-radius:50%; background:${t.color}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">${t.name[0]}</div><div class="token-name">${t.name}</div>`;
+      el.innerHTML = `<div style="width:36px; height:36px; border-radius:50%; background:${t.color}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; font-size:0.8rem;">${t.name[0]}</div><div class="token-name">${t.name}</div>`;
       
       let dragging = false, ox = 0, oy = 0;
       el.addEventListener('mousedown', (e) => {
@@ -652,4 +401,48 @@
 
   function sendMessage() {
     const input = document.getElementById('chat-input');
-    const speaker = document.getElementById('chat-speaker-select').
+    const speaker = document.getElementById('chat-speaker-select').value;
+    if (!input || !input.value.trim()) return;
+    const text = input.value.trim();
+    appendLog(speaker, text);
+
+    const diceMatch = text.match(/^(\d+)dx(?:\+(\d+))?(?:@(\d+))?$/i);
+    if (diceMatch) {
+      const num = parseInt(diceMatch[1], 10);
+      const mod = parseInt(diceMatch[2] || 0, 10);
+      const crit = parseInt(diceMatch[3] || 10, 10);
+      const res = rollDX3(num, mod, crit);
+      appendLog('[DICE BOT]', `${speaker} の判定: ${res.detail} ➔ 【合計: ${res.total}】`);
+    }
+    input.value = '';
+  }
+
+  function rollDX3(num, mod, crit) {
+    let cur = num, hist = [], total = 0, rerolls = 0;
+    if (crit < 2) crit = 2;
+    while (cur > 0) {
+      let rolls = [], next = 0;
+      for (let i = 0; i < cur; i++) {
+        let r = Math.floor(Math.random() * 10) + 1;
+        rolls.push(r);
+        if (r >= crit) next++;
+      }
+      hist.push(`[${rolls.join(',')}]`);
+      if (next > 0) { rerolls++; cur = next; }
+      else { total = (rerolls * 10) + Math.max(...rolls) + mod; break; }
+    }
+    return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
+  }
+
+  function appendLog(speaker, msg) {
+    const logs = document.getElementById('chat-logs');
+    if (!logs) return;
+    const item = document.createElement('div');
+    item.className = 'log-item';
+    item.innerHTML = `<span class="log-name">${speaker}:</span><span>${msg}</span>`;
+    logs.appendChild(item);
+    logs.scrollTop = logs.scrollHeight;
+  }
+</script>
+</body>
+</
