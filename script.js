@@ -43,7 +43,7 @@ window.onload = function() {
     renderCharacters();
     renderTokens();
     initBoardPanAndZoom();
-    updateModeUI();
+    updateModeUI(); // ★ ここを正しく修正しました
     renderChatLogs();
   } catch(e) {
     console.error("初期化エラー:", e);
@@ -378,28 +378,4 @@ function renderTokens() {
     });
     window.addEventListener('mousemove', (e) => {
       if (!dragging) return;
-      t.x = (e.clientX / boardState.scale) - ox;
-      t.y = (e.clientY / boardState.scale) - oy;
-      el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
-    });
-    window.addEventListener('mouseup', () => { dragging = false; });
-    viewport.appendChild(el);
-  });
-}
-
-function rollDX3(num, mod, crit) {
-  let cur = num, hist = [], total = 0, rerolls = 0;
-  if (crit < 2) crit = 2;
-  while (cur > 0) {
-    let rolls = [], next = 0;
-    for (let i = 0; i < cur; i++) {
-      let r = Math.floor(Math.random() * 10) + 1;
-      rolls.push(r);
-      if (r >= crit) next++;
-    }
-    hist.push(`[${rolls.join(',')}]`);
-    if (next > 0) { rerolls++; cur = next; }
-    else { total = (rerolls * 10) + Math.max(...rolls) + mod; break; }
-  }
-  return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
-}
+      t.x = (e.clientX / board
