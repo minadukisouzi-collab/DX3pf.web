@@ -11,22 +11,16 @@
 <div id="app-container">
   <header>
     <div class="title-logo">DX3rd VTT</div>
-    <div class="timeline-bar">
+     <div class="timeline-bar">
       <div class="timeline-item">
-        <span>Phase:</span>
-        <select id="phase-select" style="background:transparent; color:#fff; border:none;">
-          <option>オープニング</option>
-          <option>ミドル</option>
-          <option>クライマックス</option>
-        </select>
+        <span id="phase-label" style="font-weight:bold; color:var(--accent-gold);">Phase:</span>
+        <span id="current-phase-text" style="color:#fff;">オープニングフェイズ</span>
       </div>
-      <div class="timeline-item"><span>Sc:</span> <input type="number" id="scene-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;"></div>
-      <div class="timeline-item"><span>Rd:</span> <input type="number" id="round-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;"></div>
-      <div class="timeline-item">
-        <span style="color:var(--accent-gold); font-weight:bold;">Proc:</span>
-        <span id="current-process-text" style="color:#fff;">セットアップ</span>
-      </div>
-      <div id="process-control-buttons" style="display:flex; gap:3px;"></div>
+      <div class="timeline-item"><span>Sc:</span> <input type="number" id="scene-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;" readonly></div>
+      <div class="timeline-item"><span>Rd:</span> <input type="number" id="round-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;" readonly></div>
+      
+      <!-- 通常モード用ボタン群 ＆ 戦闘モード用プロセス表示 -->
+      <div id="mode-controls" style="display:flex; gap:4px; align-items:center;"></div>
     </div>
   </header>
 
