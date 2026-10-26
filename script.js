@@ -77,15 +77,15 @@ function updateModeUI() {
   }
 }
 
-// 次のフェーズへ（ループ）
-// 次のフェーズへ（ループ ＆ シーン番号を1にリセット）
+// 次のフェーズへ（ループ ＆ シーン番号を強制的に1にリセット）
 function nextPhase() {
   currentPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
   
-  // シーン番号を 1 にリセット
+  // シーン番号のinput要素の値を直接 1 に書き換える
   const sceneInput = document.getElementById('scene-num');
   if (sceneInput) {
     sceneInput.value = 1;
+    sceneInput.setAttribute('value', '1');
   }
 
   updateModeUI();
