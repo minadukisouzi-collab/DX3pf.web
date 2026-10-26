@@ -23,8 +23,14 @@ let chatLogsData = {
 };
 
 let isChatCollapsed = false;
+
+// フェーズ管理
+const PHASES = ['オープニングフェイズ', 'ミドルフェイズ', 'クライマックスフェイズ', 'エンディングフェイズ'];
+let currentPhaseIndex = 0;
+let isBattleMode = false; // 戦闘中フラグ
 let currentTiming = 'setup';
 let activeCharIndex = 0;
+
 let boardState = { scale: 1, panX: 0, panY: 0, isDragging: false, startX: 0, startY: 0 };
 let tokens = [
   { id: 't1', charId: 'c1', name: '綾瀬 友歌', x: 100, y: 100, color: '#457b9d' },
@@ -37,13 +43,134 @@ window.onload = function() {
     renderCharacters();
     renderTokens();
     initBoardPanAndZoom();
-    updateProcessUI();
+    updateModeUI();
     renderChatLogs();
   } catch(e) {
     console.error("初期化エラー:", e);
   }
 };
 
+// --- モード別UI更新（通常モード ⇔ 戦闘モード切替） ---
+function updateModeUI() {
+  const phaseText = document.getElementById('current-phase-text');
+  const modeControls = document.getElementById('mode-controls');
+  if (!phaseText || !modeControls) return;
+
+  phaseText.textContent = PHASES[currentPhaseIndex];
+  modeControls.innerHTML = '';
+
+  if (!isBattleMode) {
+    // 通常モード時のボタン
+    modeControls.innerHTML = `
+      <button class="btn" onclick="nextScene()">次のシーンへ</button>
+      <button class="btn" onclick="nextPhase()">次のフェーズ</button>
+      <button class="btn btn-gold" onclick="startBattle()">戦闘開始</button>
+    `;
+  } else {
+    // 戦闘モード時のプロセス進行UI
+    modeControls.innerHTML = `
+      <span style="color:var(--accent-gold); font-weight:bold; margin-left:4px;">Proc:</span>
+      <span id="current-process-text" style="color:#fff; font-weight:bold;">セットアップ</span>
+      <div id="process-control-buttons" style="display:flex; gap:3px; margin-left:4px;"></div>
+    `;
+    updateProcessUI();
+  }
+}
+
+// 次のフェーズへ（ループ）
+function nextPhase() {
+  currentPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
+  updateModeUI();
+  appendLog('[SYSTEM]', `フェーズが移行しました: 【${PHASES[currentPhaseIndex]}】`);
+}
+
+// 次のシーンへ（シーン番号インクリメント ＆ リザレクション確認サジェスト）
+function nextScene() {
+  const sceneInput = document.getElementById('scene-num');
+  if (sceneInput) {
+    let sc = parseInt(sceneInput.value, 10) || 1;
+    sceneInput.value = sc + 1;
+  }
+  appendLog('[SYSTEM]', `シーン ${sceneInput.value} に移行しました。`);
+  appendLog('[SYSTEM]', '【サジェスト】シーンが変わりました。必要に応じてタイタスの昇華やリザレクション（侵蝕率上昇・HP回復）の処理を確認してください。');
+}
+
+// 戦闘開始
+function startBattle() {
+  isBattleMode = true;
+  currentTiming = 'setup';
+  updateModeUI();
+  appendLog('[SYSTEM]', '戦闘を開始します。プロセス管理へ移行します。');
+}
+
+// 戦闘終了
+function endBattle() {
+  isBattleMode = false;
+  const roundInput = document.getElementById('round-num');
+  if (roundInput) roundInput.value = 1;
+  updateModeUI();
+  appendLog('[SYSTEM]', '戦闘が終了しました。通常モード（シーン・フェーズ管理）に戻ります。');
+}
+
+// --- 戦闘プロセス進行管理 ---
+function updateProcessUI() {
+  const textEl = document.getElementById('current-process-text');
+  const btnsEl = document.getElementById('process-control-buttons');
+  if (!textEl || !btnsEl) return;
+  btnsEl.innerHTML = '';
+
+  if (currentTiming === 'setup') {
+    textEl.textContent = 'セットアップ';
+    btnsEl.innerHTML = `<button class="btn btn-gold" onclick="transitionTo('initiative')">イニシアチブへ➔</button>`;
+  } else if (currentTiming === 'initiative') {
+    textEl.textContent = 'イニシアチブ';
+    btnsEl.innerHTML = `<button class="btn btn-gold" onclick="transitionTo('main_minor')">メインへ➔</button>`;
+  } else if (currentTiming === 'main_minor') {
+    textEl.textContent = 'メイン(マイナー)';
+    btnsEl.innerHTML = `<button class="btn btn-red" onclick="transitionTo('main_major')">メジャーへ➔</button>`;
+  } else if (currentTiming === 'main_major') {
+    textEl.textContent = 'メイン(メジャー)';
+    btnsEl.innerHTML = `<button class="btn btn-red" onclick="finishMainAction()">行動終了➔</button>`;
+  } else if (currentTiming === 'cleanup') {
+    textEl.textContent = 'クリンナップ';
+    btnsEl.innerHTML = `
+      <button class="btn btn-gold" onclick="handleRoundEnd(true)">次ラウンド➔</button>
+      <button class="btn btn-purple" onclick="handleRoundEnd(false)">戦闘終了</button>
+    `;
+  }
+}
+
+function transitionTo(nextTiming) {
+  currentTiming = nextTiming;
+  appendLog('[SYSTEM]', `タイミング変更: ${nextTiming}`);
+  updateProcessUI();
+}
+
+function finishMainAction() {
+  activeCharIndex++;
+  if (activeCharIndex >= characters.length) {
+    activeCharIndex = 0;
+    transitionTo('cleanup');
+  } else {
+    transitionTo('initiative');
+  }
+}
+
+function handleRoundEnd(toNextRound) {
+  const roundInput = document.getElementById('round-num');
+  if (toNextRound) {
+    if (roundInput) {
+      let currentRound = parseInt(roundInput.value, 10) || 1;
+      roundInput.value = currentRound + 1;
+    }
+    appendLog('[SYSTEM]', `第 ${roundInput ? roundInput.value : ''} ラウンドを開始します。`);
+    transitionTo('setup');
+  } else {
+    endBattle();
+  }
+}
+
+// --- チャット・タブ・折りたたみ ---
 function switchChatTab(tabKey) {
   currentTab = tabKey;
   const tabs = document.querySelectorAll('.chat-tab');
@@ -116,6 +243,7 @@ function appendLog(speaker, text) {
   appendLogToTab('main', speaker, text);
 }
 
+// --- キャラクター ＆ 盤面 ---
 function renderCharacters() {
   const listEl = document.getElementById('character-list');
   const speakerSelect = document.getElementById('chat-speaker-select');
@@ -193,66 +321,6 @@ function openGMModal(charId) {
 }
 
 function closeModal() { document.getElementById('gm-modal').classList.remove('active'); }
-
-function updateProcessUI() {
-  const textEl = document.getElementById('current-process-text');
-  const btnsEl = document.getElementById('process-control-buttons');
-  if (!textEl || !btnsEl) return;
-  btnsEl.innerHTML = '';
-
-  if (currentTiming === 'setup') {
-    textEl.textContent = 'セットアップ';
-    btnsEl.innerHTML = `<button class="btn btn-gold" onclick="transitionTo('initiative')">イニシアチブへ➔</button>`;
-  } else if (currentTiming === 'initiative') {
-    textEl.textContent = 'イニシアチブ';
-    btnsEl.innerHTML = `<button class="btn btn-gold" onclick="transitionTo('main_minor')">メインへ➔</button>`;
-  } else if (currentTiming === 'main_minor') {
-    textEl.textContent = 'メイン(マイナー)';
-    btnsEl.innerHTML = `<button class="btn btn-red" onclick="transitionTo('main_major')">メジャーへ➔</button>`;
-  } else if (currentTiming === 'main_major') {
-    textEl.textContent = 'メイン(メジャー)';
-    btnsEl.innerHTML = `<button class="btn btn-red" onclick="finishMainAction()">行動終了➔</button>`;
-  } else if (currentTiming === 'cleanup') {
-    textEl.textContent = 'クリンナップ';
-    btnsEl.innerHTML = `
-      <button class="btn btn-gold" onclick="handleRoundEnd(true)">次ラウンド➔</button>
-      <button class="btn btn-purple" onclick="handleRoundEnd(false)">戦闘終了</button>
-    `;
-  }
-}
-
-function transitionTo(nextTiming) {
-  currentTiming = nextTiming;
-  appendLog('[SYSTEM]', `タイミング変更: ${nextTiming}`);
-  updateProcessUI();
-}
-
-function finishMainAction() {
-  activeCharIndex++;
-  if (activeCharIndex >= characters.length) {
-    activeCharIndex = 0;
-    transitionTo('cleanup');
-  } else {
-    transitionTo('initiative');
-  }
-}
-
-function handleRoundEnd(toNextRound) {
-  const roundInput = document.getElementById('round-num');
-  if (toNextRound) {
-    if (roundInput) {
-      let currentRound = parseInt(roundInput.value, 10) || 1;
-      roundInput.value = currentRound + 1;
-    }
-    appendLog('[SYSTEM]', `第 ${roundInput ? roundInput.value : ''} ラウンドを開始します。`);
-    transitionTo('setup');
-  } else {
-    appendLog('[SYSTEM]', '戦闘が終了しました。シーン演出へ復帰します。');
-    currentTiming = 'setup';
-    if (roundInput) roundInput.value = 1;
-    updateProcessUI();
-  }
-}
 
 function initBoardPanAndZoom() {
   const wrapper = document.getElementById('board-wrapper');
@@ -334,72 +402,4 @@ function rollDX3(num, mod, crit) {
     else { total = (rerolls * 10) + Math.max(...rolls) + mod; break; }
   }
   return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
-}
-
-// フェーズの定義
-const PHASES = ['オープニングフェイズ', 'ミドルフェイズ', 'クライマックスフェイズ', 'エンディングフェイズ'];
-let currentPhaseIndex = 0;
-
-let isBattleMode = false; // 戦闘中かどうか
-
-// 初期化時にモード別UIを反映
-function updateModeUI() {
-  const modeControls = document.getElementById('mode-controls');
-  const phaseText = document.getElementById('current-phase-text');
-  if (!modeControls || !phaseText) return;
-
-  phaseText.textContent = PHASES[currentPhaseIndex];
-  modeControls.innerHTML = '';
-
-  if (!isBattleMode) {
-    // 通常モード
-    modeControls.innerHTML = `
-      <button class="btn" onclick="nextScene()">次のシーンへ</button>
-      <button class="btn" onclick="nextPhase()">次のフェーズ</button>
-      <button class="btn btn-gold" onclick="startBattle()">戦闘開始</button>
-    `;
-  } else {
-    // 戦闘モード
-    modeControls.innerHTML = `
-      <span style="color:var(--accent-gold); font-weight:bold; margin-left:4px;">Proc:</span>
-      <span id="current-process-text" style="color:#fff; font-weight:bold;">セットアップ</span>
-      <div id="process-control-buttons" style="display:flex; gap:3px; margin-left:4px;"></div>
-    `;
-    updateProcessUI();
-  }
-}
-
-// 次のフェーズへ（ループ）
-function nextPhase() {
-  currentPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
-  updateModeUI();
-  appendLog('[SYSTEM]', `フェーズが移行しました: 【${PHASES[currentPhaseIndex]}】`);
-}
-
-// 次のシーンへ（シーン番号インクリメント ＆ リザレクションサジェスト）
-function nextScene() {
-  const sceneInput = document.getElementById('scene-num');
-  if (sceneInput) {
-    let sc = parseInt(sceneInput.value, 10) || 1;
-    sceneInput.value = sc + 1;
-  }
-  appendLog('[SYSTEM]', `シーン ${sceneInput.value} に移行しました。`);
-  appendLog('[SYSTEM]', '【サジェスト】シーンが変わりました。必要に応じてロイスのタイタス昇華やリザレクション（侵蝕率上昇・HP回復）の処理を行ってください。');
-}
-
-// 戦闘開始
-function startBattle() {
-  isBattleMode = true;
-  currentTiming = 'setup';
-  updateModeUI();
-  appendLog('[SYSTEM]', '戦闘を開始します。イニシアチブおよびプロセス管理へ移行します。');
-}
-
-// 戦闘終了
-function endBattle() {
-  isBattleMode = false;
-  const roundInput = document.getElementById('round-num');
-  if (roundInput) roundInput.value = 1;
-  updateModeUI();
-  appendLog('[SYSTEM]', '戦闘が終了しました。通常モード（シーン・フェーズ管理）に戻ります。');
 }
