@@ -45,6 +45,7 @@ window.onload = function() {
     initBoardPanAndZoom();
     updateModeUI();
     renderChatLogs();
+    loadEffectsMaster();
   } catch(e) {
     console.error("初期化エラー:", e);
   }
@@ -408,3 +409,74 @@ function rollDX3(num, mod, crit) {
   }
   return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
 }
+
+// エフェクトのマスターデータを保持する変数
+let effectsMasterData = {};
+
+// 起動時にGitHubからエフェクトマスターデータを読み込む
+async function loadEffectsMaster() {
+  try {
+    // ※ 実際のファイルパス（同一リポジトリ内ならファイル名でOK）を指定
+    const response = await fetch('effects_master.json');
+    if (response.ok) {
+      effectsMasterData = await response.json();
+      console.log('エフェクトマスターデータを読み込みました:', effectsMasterData);
+    }
+  } catch (e) {
+    console.warn('エフェクトマスターデータの読み込みに失敗しました（ローカル動作など）:', e);
+  }
+}
+
+// キャラクターがエフェクトを使用したときのコア処理
+function applyEffect(charId, effectId, level) {
+  const char = characters.find(c => c.id === charId);
+  const effect = effectsMasterData[effectId];
+
+  if (!char) {
+    alert('キャラクターが見つかりません');
+    return;
+  }
+  if (!effect) {
+    alert('指定されたエフェクトがデータベースに存在しません');
+    return;
+  }
+
+  // 1. 侵蝕率コストの自動支払い
+  const totalEncroachCost = effect.encroach; // 必要なら level * コスト などの計算も可
+  char.erosion += totalEncroachCost;
+
+  // 2. 変動値（バフ・デバフ）の計算と適用用オブジェクト
+  let appliedDetails = [];
+
+  effect.modifications.forEach(mod => {
+    // 例: "level * 2" のような計算式を安全に評価
+    // ※簡易的に level を代入して計算
+    let val = 0;
+    try {
+      val = eval(mod.calc.replace(/level/g, level));
+    } catch (e) {
+      console.error('計算式のエラー:', mod.calc);
+    }
+
+    // ステータスへの反映（一時バフや修正値として保持、または直接加算）
+    if (!char.tempModifiers) char.tempModifiers = { dice: 0, crit: 0, atk: 0 };
+    
+    if (mod.stat === 'dice') {
+      char.tempModifiers.dice += val;
+      appliedDetails.push(`ダイス ${val > 0 ? '+' + val : val}`);
+    } else if (mod.stat === 'crit') {
+      char.tempModifiers.crit += val; // C値マイナスは有利
+      appliedDetails.push(`C値 ${val > 0 ? '+' + val : val}`);
+    } else if (mod.stat === 'atk') {
+      char.tempModifiers.atk += val;
+      appliedDetails.push(`攻撃力 ${val > 0 ? '+' + val : val}`);
+    }
+  });
+
+  // 3. 画面の更新とチャットログへの自動出力
+  renderCharacters();
+  
+  const detailStr = appliedDetails.length > 0 ? `（${appliedDetails.join(', ')}）` : '';
+  appendLog('[SYSTEM]', `${char.name} は【${effect.name}】（Lv.${level}）を使用！ 侵蝕率+${totalEncroachCost}% ${detailStr}`);
+}
+
