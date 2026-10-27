@@ -10,6 +10,17 @@ const ALL_BAD_STATUSES = [
   { id: 'mut_fear', name: '変異:恐怖', type: 'type-berserk' }
 ];
 
+let nameToIdMap = {};       // エフェクト名からIDを逆引きする辞書
+
+// シンドロームごとのプレフィックス定義
+const SYNDROME_PREFIXES = {
+  ang: 'ang', bal: 'bal', bld: 'bld', bsk: 'bsk',
+  cym: 'cym', exg: 'exg', hnm: 'hnm', mol: 'mol',
+  num: 'num', ork: 'ork', slm: 'slm', slr: 'slr',
+  uro: 'uro', gen: 'gen'
+};
+
+
 let characters = [
   { 
     id: 'c1', 
@@ -454,16 +465,24 @@ let effectsMasterData = {};
 // 起動時にGitHubからエフェクトマスターデータを読み込む
 async function loadEffectsMaster() {
   try {
-    // ※ 実際のファイルパス（同一リポジトリ内ならファイル名でOK）を指定
     const response = await fetch('effects_master.json');
     if (response.ok) {
       effectsMasterData = await response.json();
+      
+      // ★ここで逆引き辞書を自動構築
+      nameToIdMap = {};
+      for (const [id, data] of Object.entries(effectsMasterData)) {
+        nameToIdMap[data.name] = id;
+      }
+      
       console.log('エフェクトマスターデータを読み込みました:', effectsMasterData);
+      console.log('逆引き辞書:', nameToIdMap);
     }
   } catch (e) {
     console.warn('エフェクトマスターデータの読み込みに失敗しました（ローカル動作など）:', e);
   }
 }
+
 
 // キャラクターがエフェクトを使用したときのコア処理
 function applyEffect(charId, effectId, level) {
