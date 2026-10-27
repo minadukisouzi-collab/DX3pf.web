@@ -14,11 +14,10 @@ const ALL_BAD_STATUSES = [
   { id: 'mut_fear', name: '変異:恐怖', type: 'type-berserk' }
 ];
 
-// シンドロームのプレフィックス定義
 const SYNDROME_PREFIXES = {
-  ang: 'ang', bal: 'bal', bld: 'bld', bsk: 'bsk',
+  ang: 'ang', bal: 'bal', bdg: 'bdg', bld: 'bld',
   cym: 'cym', exg: 'exg', hnm: 'hnm', mol: 'mol',
-  num: 'num', ork: 'ork', slm: 'slm', slr: 'slr',
+  num: 'num', ork: 'ork', slm: 'slm', slr: 'slr', 
   uro: 'uro', gen: 'gen'
 };
 
