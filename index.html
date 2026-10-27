@@ -95,15 +95,41 @@
       <button class="btn" onclick="closeEffectModal()">✕</button>
     </div>
     
-    <div style="display:flex; flex-direction:column; gap:8px; font-size:0.8rem;">
+<!-- エフェクト登録モーダル内の入力部分 -->
+<div style="display:flex; flex-direction:column; gap:8px; font-size:0.8rem;">
+      <!-- ★シンドローム選択の追加 -->
       <div>
-        <span>エフェクトID (半角英数):</span>
-        <input type="text" id="eff-id" placeholder="例: siren_witch" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
+        <span>シンドローム:</span>
+        <select id="eff-syndrome" onchange="updateEffectIdAuto()" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
+          <option value="ang">エンジェルハィロゥ (ang)</option>
+          <option value="bal">バロール (bal)</option>
+          <option value="bld">ブラックドッグ (bld)</option>
+          <option value="bsk">ブラム・ストーカー (bsk)</option>
+          <option value="cym">キュマイラ (cym)</option>
+          <option value="exg">エグザイル (exg)</option>
+          <option value="hnm">ハヌマーン (hnm)</option>
+          <option value="mol">モルフェウス (mol)</option>
+          <option value="num">ノイマン (num)</option>
+          <option value="ork">オルクス (ork)</option>
+          <option value="slm">サラマンダー (slm)</option>
+          <option value="slr">ソラリス (slr)</option>
+          <option value="uro">ウロボロス (uro)</option>
+          <option value="gen">一般 (gen)</option>
+        </select>
       </div>
+
+      <div>
+        <span>エフェクトID (自動生成):</span>
+        <input type="text" id="eff-id" readonly style="width:100%; background:#050608; border:1px solid var(--border-color); color:#a8dadc; padding:4px; border-radius:4px; margin-top:2px;" placeholder="自動採番されます">
+      </div>
+
       <div>
         <span>エフェクト名 (日本語):</span>
         <input type="text" id="eff-name" placeholder="例: サイレンの魔女" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
       </div>
+
+      <!-- （以下、タイミングや効果の入力欄が続く） -->
+
       <div style="display:flex; gap:8px;">
         <div style="flex:1;">
           <span>タイミング:</span>
