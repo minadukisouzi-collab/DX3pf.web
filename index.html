@@ -127,15 +127,18 @@
         <label style="flex:1;">最大Lv:
           <input type="number" id="eff-max-level" value="1" min="1" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
         </label>
-        <label style="flex:2;">タイミング:
-          <select id="eff-timing" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
-            <option value="メジャーアクション">メジャーアクション</option>
-            <option value="マイナーアクション">マイナーアクション</option>
-            <option value="セットアップ">セットアップ</option>
-            <option value="判定直前">判定直前</option>
-            <option value="常時">常時</option>
-          </select>
-        </label>
+<label>タイミング:
+  <select id="eff-timing" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+    <option value="メジャーアクション">メジャーアクション</option>
+    <option value="マイナーアクション">マイナーアクション</option>
+    <option value="セットアップ">セットアップ</option>
+    <option value="イニシアチブ">イニシアチブ</option>
+    <option value="オートアクション">オートアクション</option>
+    <option value="クリンナップ">クリンナップ</option>
+    <option value="常時">常時</option>
+  </select>
+</label>
+
       </div>
 
       <div style="display:flex; gap:6px;">
