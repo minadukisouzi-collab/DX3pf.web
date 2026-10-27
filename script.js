@@ -11,9 +11,30 @@ const ALL_BAD_STATUSES = [
 ];
 
 let characters = [
-  { id: 'c1', name: '綾瀬 友歌', hp: 30, maxHp: 30, erosion: 80, initiative: 12, badStatuses: ['pressure'] },
-  { id: 'c2', name: '鷹司 秀一', hp: 35, maxHp: 35, erosion: 102, initiative: 8, badStatuses: ['hard'] }
+  { 
+    id: 'c1', 
+    name: '綾瀬 友歌', 
+    hp: 30, maxHp: 30, erosion: 80, initiative: 12, badStatuses: ['pressure'],
+    // 所持エフェクトのリスト (effectId と level を保持)
+    effects: [
+      { id: 'siren_witch', level: 1 },
+      { id: 'mashira_no_gotoku', level: 2 },
+      { id: 'shippu_jinrai', level: 1 }
+    ]
+  },
+  { 
+    id: 'c2', 
+    name: '鷹司 秀一', 
+    hp: 35, maxHp: 35, erosion: 102, initiative: 8, badStatuses: ['hard'],
+    effects: [
+      { id: 'concentrate_angel', level: 3 },
+      { id: 'hikari_no_juu', level: 1 },
+      { id: 'kousoku_no_ken', level: 2 },
+      { id: 'mirror_coat', level: 1 }
+    ]
+  }
 ];
+
 
 let currentTab = 'main';
 let chatLogsData = {
