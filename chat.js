@@ -126,3 +126,16 @@ function rollDX3(num, mod, crit) {
   }
   return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
 }
+
+// 一般的な d10 ダイスロール用エンジン
+function rollD10(num, mod) {
+  let rolls = [];
+  let sum = 0;
+  for (let i = 0; i < num; i++) {
+    let r = Math.floor(Math.random() * 10) + 1;
+    rolls.push(r);
+    sum += r;
+  }
+  return { total: sum + mod, rolls: rolls };
+}
+
