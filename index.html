@@ -170,12 +170,17 @@
 
       <div style="border-top:1px solid #2a2f3a; padding-top:4px; margin-top:2px; font-weight:bold;">効果モジュール設定</div>
       <div style="display:flex; gap:6px;">
-        <label style="flex:1;">変動ステータス:
-          <select id="eff-stat" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
-            <option value="dice">ダイス (dice)</option>
-            <option value="crit">C値 (crit)</option>
-            <option value="atk">攻撃力 (atk)</option>
-          </select>
+        <label>変動ステータス:
+  <select id="eff-stat" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+    <option value="dice">ダイス (dice)</option>
+    <option value="crit">C値 (crit)</option>
+    <option value="atk">攻撃力 (atk)</option>
+    <option value="hp">HP変動 (hp)</option>
+    <option value="encroach">侵蝕率 (encroach)</option>
+    <option value="guard">ガード値 (guard)</option>
+    <option value="armor">装甲値 (armor)</option>
+  </select>
+</label>
         </label>
         <label style="flex:1;">計算式:
           <input type="text" id="eff-calc" value="level * 2" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
