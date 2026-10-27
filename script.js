@@ -572,3 +572,46 @@ function downloadEffectsJson() {
   alert('エフェクトのJSONデータをダウンロードしました！この中身をGitHubの effects_master.json に追記してください。');
 }
 
+// シンドロームごとのプレフィックス定義
+const SYNDROME_PREFIXES = {
+  ang: 'ang', bal: 'bal', bld: 'bld', bsk: 'bsk',
+  cym: 'cym', exg: 'exg', hnm: 'hnm', mol: 'mol',
+  num: 'num', ork: 'ork', slm: 'slm', slr: 'slr',
+  uro: 'uro', gen: 'gen'
+};
+
+// 選択されたシンドロームに基づいてIDを自動採番して入力欄に反映する
+function updateEffectIdAuto() {
+  const syndromeKey = document.getElementById('eff-syndrome').value;
+  const prefix = SYNDROME_PREFIXES[syndromeKey] || 'gen';
+
+  // 現在の effectsMasterData の中から、同じプレフィックスから始まるIDを数えて次の番号を決める
+  let count = 1;
+  if (typeof effectsMasterData !== 'undefined' && effectsMasterData) {
+    const matchingIds = Object.keys(effectsMasterData).filter(id => id.startsWith(prefix + '_'));
+    count = matchingIds.length + 1;
+  }
+
+  // 3桁のゼロ埋め文字列を作る (例: 1 ➔ "001")
+  const numStr = String(count).padStart(3, '0');
+  const generatedId = `${prefix}_${numStr}`;
+
+  // ID入力欄（readonly）にセット
+  const idInput = document.getElementById('eff-id');
+  if (idInput) {
+    idInput.value = generatedId;
+  }
+
+  // プレビューも連動して更新
+  if (typeof generateEffectJson === 'function') {
+    generateEffectJson();
+  }
+}
+
+// モーダルを開いた時にも自動採番を実行する
+const originalOpenEffectModal = typeof openEffectModal === 'function' ? openEffectModal : null;
+openEffectModal = function() {
+  const modal = document.getElementById('effect-modal');
+  if (modal) modal.classList.add('active');
+  updateEffectIdAuto(); // フォームを開いたタイミングで最新の連番を採番
+};
