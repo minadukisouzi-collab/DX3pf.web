@@ -518,3 +518,57 @@ function applyEffect(charId, effectId, level) {
   appendLog('[SYSTEM]', `${char.name} は【${effect.name}】（Lv.${level}）を使用！ 侵蝕率+${totalEncroachCost}% ${detailStr}`);
 }
 
+// --- エフェクト登録フォーム用モーダル制御 ---
+function openEffectModal() {
+  const modal = document.getElementById('effect-modal');
+  if (modal) modal.classList.add('active');
+  generateEffectJson(); // 開いた時に初期値でプレビュー生成
+}
+
+function closeEffectModal() {
+  const modal = document.getElementById('effect-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+// フォームの内容からJSON文字列を自動生成する
+function generateEffectJson() {
+  const id = document.getElementById('eff-id').value.trim() || 'sample_effect';
+  const name = document.getElementById('eff-name').value.trim() || 'サンプルエフェクト';
+  const timing = document.getElementById('eff-timing').value.trim() || 'メジャー';
+  const encroach = parseInt(document.getElementById('eff-encroach').value, 10) || 3;
+  const stat = document.getElementById('eff-stat').value;
+  const calc = document.getElementById('eff-calc').value.trim() || 'level * 1';
+
+  // 1つのエフェクトオブジェクトを作成
+  const effectObj = {
+    [id]: {
+      name: name,
+      timing: timing,
+      encroach: encroach,
+      effect_type: "buff",
+      target_type: "self",
+      modifications: [
+        { stat: stat, calc: calc }
+      ]
+    }
+  };
+
+  // プレビュー用テキストエリアに綺麗に整形して流し込む
+  document.getElementById('eff-json-output').value = JSON.stringify(effectObj, null, 2);
+}
+
+// 生成されたJSONをファイルとしてダウンロードする（これをそのままGitHubのeffects_master.jsonに追加すればOK！）
+function downloadEffectsJson() {
+  const jsonText = document.getElementById('eff-json-output').value;
+  const blob = new Blob([jsonText], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'effect_add.json'; // 追加用ファイルとしてダウンロード
+  a.click();
+  
+  URL.revokeObjectURL(url);
+  alert('エフェクトのJSONデータをダウンロードしました！この中身をGitHubの effects_master.json に追記してください。');
+}
+
