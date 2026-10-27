@@ -249,6 +249,14 @@
     </div>
   </div>
 </div>
-<script src="script.js"></script>
+  <!-- スクリプトの分割読み込み（依存関係の順） -->
+  <script src="main.js"></script>     <!-- 共通変数、キャラクター管理、初期化など -->
+  <script src="effects.js"></script>  <!-- エフェクト関連、逆引き辞書、登録モーダルなど -->
+  <script src="battle.js"></script>   <!-- フェーズ・戦闘プロセス管理など -->
+  <script src="board.js"></script>    <!-- トークン移動、マップのズーム・パンなど -->
+  <script src="chat.js"></script>     <!-- チャット、タブ切替、ダイスロールなど -->
+</body>
+</html>
+
 </body>
 </html>
