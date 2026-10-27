@@ -27,10 +27,14 @@
   <div id="main-content">
     <div id="char-sidebar">
       <div class="sidebar-section">
-        <div class="sidebar-title">
-          <span>キャラクター一覧</span>
-          <button class="btn" onclick="addCharacter()">+ 追加</button>
-        </div>
+        <!-- キャラクター一覧タイトルの部分 -->
+          <div class="sidebar-title">
+             <span>キャラクター一覧</span>
+               <div style="display:flex; gap:4px;">
+                  <button class="btn btn-purple" onclick="openEffectModal()" style="font-size:0.7rem;">+ エフェクト追加</button>
+    <button class="btn" onclick="addCharacter()">+ キャラ追加</button>
+  </div>
+</div>
         <div id="character-list"></div>
       </div>
     </div>
