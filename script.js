@@ -530,88 +530,40 @@ function closeEffectModal() {
   if (modal) modal.classList.remove('active');
 }
 
-// フォームの内容からJSON文字列を自動生成する
+// フォームの内容から完全なエフェクトマスター用JSONを生成する
 function generateEffectJson() {
-  const id = document.getElementById('eff-id').value.trim() || 'sample_effect';
+  const id = document.getElementById('eff-id').value.trim() || 'ang_001';
   const name = document.getElementById('eff-name').value.trim() || 'サンプルエフェクト';
-  const timing = document.getElementById('eff-timing').value.trim() || 'メジャー';
-  const encroach = parseInt(document.getElementById('eff-encroach').value, 10) || 3;
+  const maxLevel = parseInt(document.getElementById('eff-max-level').value, 10) || 1;
+  const timing = document.getElementById('eff-timing').value;
+  const skill = document.getElementById('eff-skill').value.trim();
+  const difficulty = document.getElementById('eff-difficulty').value;
+  const target = document.getElementById('eff-target-type-sel').value;
+  const range = document.getElementById('eff-range').value;
+  const encroach = document.getElementById('eff-encroach').value.trim();
+  const limit = document.getElementById('eff-limit').value;
+  
   const stat = document.getElementById('eff-stat').value;
-  const calc = document.getElementById('eff-calc').value.trim() || 'level * 1';
+  const calc = document.getElementById('eff-calc').value.trim();
 
-  // 1つのエフェクトオブジェクトを作成
   const effectObj = {
     [id]: {
       name: name,
+      max_level: maxLevel,
       timing: timing,
+      skill: skill,
+      difficulty: difficulty,
+      target: target,
+      range: range,
       encroach: encroach,
+      limit: limit,
       effect_type: "buff",
-      target_type: "self",
+      target_type: target === "-" ? "self" : "other",
       modifications: [
         { stat: stat, calc: calc }
       ]
     }
   };
 
-  // プレビュー用テキストエリアに綺麗に整形して流し込む
   document.getElementById('eff-json-output').value = JSON.stringify(effectObj, null, 2);
 }
-
-// 生成されたJSONをファイルとしてダウンロードする（これをそのままGitHubのeffects_master.jsonに追加すればOK！）
-function downloadEffectsJson() {
-  const jsonText = document.getElementById('eff-json-output').value;
-  const blob = new Blob([jsonText], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'effect_add.json'; // 追加用ファイルとしてダウンロード
-  a.click();
-  
-  URL.revokeObjectURL(url);
-  alert('エフェクトのJSONデータをダウンロードしました！この中身をGitHubの effects_master.json に追記してください。');
-}
-
-// シンドロームごとのプレフィックス定義
-const SYNDROME_PREFIXES = {
-  ang: 'ang', bal: 'bal', bld: 'bld', bsk: 'bsk',
-  cym: 'cym', exg: 'exg', hnm: 'hnm', mol: 'mol',
-  num: 'num', ork: 'ork', slm: 'slm', slr: 'slr',
-  uro: 'uro', gen: 'gen'
-};
-
-// 選択されたシンドロームに基づいてIDを自動採番して入力欄に反映する
-function updateEffectIdAuto() {
-  const syndromeKey = document.getElementById('eff-syndrome').value;
-  const prefix = SYNDROME_PREFIXES[syndromeKey] || 'gen';
-
-  // 現在の effectsMasterData の中から、同じプレフィックスから始まるIDを数えて次の番号を決める
-  let count = 1;
-  if (typeof effectsMasterData !== 'undefined' && effectsMasterData) {
-    const matchingIds = Object.keys(effectsMasterData).filter(id => id.startsWith(prefix + '_'));
-    count = matchingIds.length + 1;
-  }
-
-  // 3桁のゼロ埋め文字列を作る (例: 1 ➔ "001")
-  const numStr = String(count).padStart(3, '0');
-  const generatedId = `${prefix}_${numStr}`;
-
-  // ID入力欄（readonly）にセット
-  const idInput = document.getElementById('eff-id');
-  if (idInput) {
-    idInput.value = generatedId;
-  }
-
-  // プレビューも連動して更新
-  if (typeof generateEffectJson === 'function') {
-    generateEffectJson();
-  }
-}
-
-// モーダルを開いた時にも自動採番を実行する
-const originalOpenEffectModal = typeof openEffectModal === 'function' ? openEffectModal : null;
-openEffectModal = function() {
-  const modal = document.getElementById('effect-modal');
-  if (modal) modal.classList.add('active');
-  updateEffectIdAuto(); // フォームを開いたタイミングで最新の連番を採番
-};
