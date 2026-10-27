@@ -280,9 +280,22 @@ function renderCharacters() {
   speakerSelect.innerHTML = '<option value="GM">GM</option>';
 
   characters.forEach(c => {
+    // 1. バッドステータスのバッジ生成
     const bsBadgesHtml = c.badStatuses.map(bsId => {
       const bs = ALL_BAD_STATUSES.find(b => b.id === bsId);
       return bs ? `<span class="bs-badge ${bs.type}">${bs.name}</span>` : '';
+    }).join('');
+
+    // 2. 所持エフェクトのボタン生成（★ここを追加）
+    const effectsHtml = (c.effects || []).map(eff => {
+      // GitHubから読み込んだ effectsMasterData から名称を引く（未登録ならIDをそのまま表示）
+      const master = (typeof effectsMasterData !== 'undefined' ? effectsMasterData[eff.id] : null) || { name: eff.id };
+      return `
+        <button class="btn" style="font-size:0.6rem; padding:2px 5px; background:#2b2d42; border:1px solid #4a4e69; color:#edf2f4; cursor:pointer;" 
+          onclick="applyEffect('${c.id}', '${eff.id}', ${eff.level})">
+          ${master.name} (Lv.${eff.level})
+        </button>
+      `;
     }).join('');
 
     const card = document.createElement('div');
@@ -297,7 +310,11 @@ function renderCharacters() {
         <span>侵蝕:</span><input type="number" value="${c.erosion}" onchange="updateStat('${c.id}', 'erosion', this.value)">%
         <span>行動:</span><input type="number" value="${c.initiative}" onchange="updateStat('${c.id}', 'initiative', this.value)">
       </div>
-      <div class="bs-icon-container">${bsBadgesHtml || '<span style="font-size:0.6rem; color:#666;">BSなし</span>'}</div>
+      <div class="bs-icon-container" style="margin-top:4px;">${bsBadgesHtml || '<span style="font-size:0.6rem; color:#666;">BSなし</span>'}</div>
+      <!-- 所持エフェクトの一覧エリア -->
+      <div class="effect-buttons-container" style="display:flex; flex-wrap:wrap; gap:3px; margin-top:6px;">
+        ${effectsHtml || '<span style="font-size:0.6rem; color:#666;">エフェクトなし</span>'}
+      </div>
     `;
     listEl.appendChild(card);
 
