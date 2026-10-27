@@ -67,7 +67,7 @@ function sendMessage() {
 
   appendLogToTab(currentTab, speaker, text);
 
-  // ダブルクロス用ダイスパターンのマッチング (例: 8dx+2@8)
+  // 1. ダブルクロス用ダイスパターンのマッチング (例: 8dx+2@8)
   const diceMatch = text.match(/^(\d+)dx(?:\+(\d+))?(?:@(\d+))?$/i);
   if (diceMatch) {
     const num = parseInt(diceMatch[1], 10);
@@ -75,6 +75,19 @@ function sendMessage() {
     const crit = parseInt(diceMatch[3] || 10, 10);
     const res = rollDX3(num, mod, crit);
     appendLogToTab(currentTab, '[DICE BOT]', `${speaker} の判定: ${res.detail} ➔ 【合計: ${res.total}】`);
+    input.value = '';
+    return;
+  }
+
+  // 2. 一般的な d10 ダイスロールパターンのマッチング (例: 2d10+3, 5d10)
+  const d10Match = text.match(/^(\d+)d10(?:\+(\d+))?$/i);
+  if (d10Match) {
+    const num = parseInt(d10Match[1], 10);
+    const mod = parseInt(d10Match[2] || 0, 10);
+    const res = rollD10(num, mod);
+    appendLogToTab(currentTab, '[DICE BOT]', `${speaker} のダイスロール (${num}d10${mod ? '+' + mod : ''}): [${res.rolls.join(', ')}] ➔ 【合計: ${res.total}】`);
+    input.value = '';
+    return;
   }
 
   input.value = '';
