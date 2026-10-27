@@ -1,0 +1,25 @@
+{
+  "hyakkaryouran": {
+    "name": "百花繚乱",
+    "timing": "メジャー",
+    "skill": "白兵",
+    "encroach": 4,
+    "effect_type": "buff",
+    "target_type": "self",
+    "modifications": [
+      { "stat": "dice", "calc": "level * 2" },
+      { "stat": "crit", "calc": "-1" }
+    ]
+  },
+  "kousoku_kousen": {
+    "name": "光線照射",
+    "timing": "メジャー",
+    "skill": "射撃",
+    "encroach": 3,
+    "effect_type": "buff",
+    "target_type": "self",
+    "modifications": [
+      { "stat": "atk", "calc": "level * 3" }
+    ]
+  }
+}
