@@ -93,162 +93,111 @@
       <button class="btn" onclick="closeEffectModal()">✕</button>
     </div>
     
-<!-- エフェクト登録モーダル -->
+<!-- 新規エフェクト登録モーダル -->
 <div class="modal-overlay" id="effect-modal">
-  <div class="modal-card" style="width: 520px; max-height: 90vh; overflow-y: auto;">
-    <div style="font-weight:bold; margin-bottom:10px; display:flex; justify-content:space-between; font-size:0.9rem;">
+  <div class="modal-card" style="max-height: 90vh; overflow-y: auto;">
+    <div style="font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
       <span>新規エフェクト登録（マスターデータ作成）</span>
-      <button class="btn" onclick="closeEffectModal()">✕</button>
+      <button class="btn" onclick="closeEffectModal()" style="font-size:0.7rem; padding:2px 6px;">✕</button>
     </div>
     
-    <div style="display:flex; flex-direction:column; gap:8px; font-size:0.8rem;">
-      
-      <!-- シンドローム＆自動ID -->
-      <div style="display:flex; gap:8px;">
-        <div style="flex:1;">
-          <span>シンドローム:</span>
-          <select id="eff-syndrome" onchange="updateEffectIdAuto()" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-            <option value="ang">エンジェルハィロゥ (ang)</option>
-            <option value="bal">バロール (bal)</option>
-            <option value="bld">ブラックドッグ (bld)</option>
-            <option value="bsk">ブラム・ストーカー (bsk)</option>
-            <option value="cym">キュマイラ (cym)</option>
-            <option value="exg">エグザイル (exg)</option>
-            <option value="hnm">ハヌマーン (hnm)</option>
-            <option value="mol">モルフェウス (mol)</option>
-            <option value="num">ノイマン (num)</option>
-            <option value="ork">オルクス (ork)</option>
-            <option value="slm">サラマンダー (slm)</option>
-            <option value="slr">ソラリス (slr)</option>
-            <option value="uro">ウロボロス (uro)</option>
-            <option value="gen">一般 (gen)</option>
-          </select>
-        </div>
-        <div style="flex:1;">
-          <span>エフェクトID (自動):</span>
-          <input type="text" id="eff-id" readonly style="width:100%; background:#050608; border:1px solid var(--border-color); color:#a8dadc; padding:4px; border-radius:4px; margin-top:2px;">
-        </div>
-      </div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:0.75rem;">
+      <label>シンドローム:
+        <select id="eff-syndrome" onchange="updateEffectIdAuto()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+          <option value="ang">エンジェルハイロゥ (ang)</option>
+          <option value="bal">バルキリー (bal)</option>
+          <option value="bld">ブラム＝ストーカー (bld)</option>
+          <option value="bsk">バッドシード (bsk)</option>
+          <option value="cym">キュマイラ (cym)</option>
+          <option value="exg">エグザイル (exg)</option>
+          <option value="hnm">ハヌマーン (hnm)</option>
+          <option value="mol">モルフェウス (mol)</option>
+          <option value="num">オルクス (num)</option>
+          <option value="ork">サラマンダー (ork)</option>
+          <option value="slm">ノイマン (slm)</option>
+          <option value="slr">ソラリス (slr)</option>
+          <option value="uro">ウロボロス (uro)</option>
+          <option value="gen">汎用 (gen)</option>
+        </select>
+      </label>
 
-      <!-- 名称 ＆ 最大レベル -->
-      <div style="display:flex; gap:8px;">
-        <div style="flex:3;">
-          <span>エフェクト名:</span>
-          <input type="text" id="eff-name" placeholder="例: イルミネイト" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-        </div>
-        <div style="flex:1;">
-          <span>最大Lv:</span>
-          <input type="number" id="eff-max-level" value="3" min="1" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-        </div>
-      </div>
+      <label>ID (自動採番):
+        <input type="text" id="eff-id" readonly style="width:100%; background:#1a1c23; color:#aaa; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      </label>
 
-      <!-- タイミング ＆ 技能 -->
-      <div style="display:flex; gap:8px;">
-        <div style="flex:1;">
-          <span>タイミング:</span>
-          <select id="eff-timing" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-            <option value="セットアッププロセス">セットアッププロセス</option>
-            <option value="イニシアチブプロセス">イニシアチブプロセス</option>
+      <label>エフェクト名:
+        <input type="text" id="eff-name" value="" placeholder="例: 虚空の弾丸" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      </label>
+
+      <div style="display:flex; gap:6px;">
+        <label style="flex:1;">最大Lv:
+          <input type="number" id="eff-max-level" value="1" min="1" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        </label>
+        <label style="flex:2;">タイミング:
+          <select id="eff-timing" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+            <option value="メジャーアクション">メジャーアクション</option>
             <option value="マイナーアクション">マイナーアクション</option>
-            <option value="メジャーアクション" selected>メジャーアクション</option>
-            <option value="リアクション">リアクション</option>
-            <option value="オートアクション">オートアクション</option>
-            <option value="クリンナッププロセス">クリンナッププロセス</option>
+            <option value="セットアップ">セットアップ</option>
+            <option value="判定直前">判定直前</option>
+            <option value="常時">常時</option>
           </select>
-        </div>
-        <div style="flex:1;">
-          <span>技能:</span>
-          <input type="text" id="eff-skill" placeholder="例: &lt;RC&gt; や 白兵" value="&lt;RC&gt;" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-        </div>
+        </label>
       </div>
 
-      <!-- 難易度 ＆ 対象 -->
-      <div style="display:flex; gap:8px;">
-        <div style="flex:1;">
-          <span>難易度:</span>
-          <select id="eff-difficulty" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-            <option value="自動成功" selected>自動成功</option>
-            <option value="対決">対決</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-        <div style="flex:1;">
-          <span>対象:</span>
-          <select id="eff-target-type-sel" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-            <option value="-" selected>-</option>
+      <div style="display:flex; gap:6px;">
+        <label style="flex:1;">スキル:
+          <input type="text" id="eff-skill" value="<RC>" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        </label>
+        <label style="flex:1;">難易度:
+          <input type="text" id="eff-difficulty" value="自動成功" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        </label>
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <label style="flex:1;">対象:
+          <select id="eff-target-type-sel" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+            <option value="-">- (自身)</option>
             <option value="単体">単体</option>
             <option value="範囲">範囲</option>
-            <option value="範囲(選択)">範囲(選択)</option>
-            <option value="シーン">シーン</option>
-            <option value="シーン(選択)">シーン(選択)</option>
           </select>
-        </div>
+        </label>
+        <label style="flex:1;">射程:
+          <input type="text" id="eff-range" value="視界" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        </label>
       </div>
 
-      <!-- 射程 ＆ 侵蝕値 ＆ 制限 -->
-      <div style="display:flex; gap:8px;">
-        <div style="flex:1;">
-          <span>射程:</span>
-          <select id="eff-range" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-            <option value="至近">至近</option>
-            <option value="視界" selected>視界</option>
-            <option value="m指定">m指定</option>
+      <div style="display:flex; gap:6px;">
+        <label style="flex:1;">侵蝕コスト:
+          <input type="text" id="eff-encroach" value="2" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        </label>
+        <label style="flex:1;">制限:
+          <input type="text" id="eff-limit" value="-" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        </label>
+      </div>
+
+      <div style="border-top:1px solid #2a2f3a; padding-top:4px; margin-top:2px; font-weight:bold;">効果モジュール設定</div>
+      <div style="display:flex; gap:6px;">
+        <label style="flex:1;">変動ステータス:
+          <select id="eff-stat" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+            <option value="dice">ダイス (dice)</option>
+            <option value="crit">C値 (crit)</option>
+            <option value="atk">攻撃力 (atk)</option>
           </select>
-        </div>
-        <div style="flex:1;">
-          <span>侵蝕値 (コスト):</span>
-          <input type="text" id="eff-encroach" value="2" placeholder="例: 2 や 1d10" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-        </div>
-        <div style="flex:1;">
-          <span>制限:</span>
-          <select id="eff-limit" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-            <option value="-" selected>-</option>
-            <option value="80%">80%</option>
-            <option value="100%">100%</option>
-            <option value="120%">120%</option>
-            <option value="ピュアブリード">ピュアブリード</option>
-            <option value="リミット">リミット</option>
-            <option value="エネミーエフェクト">エネミーエフェクト</option>
-            <option value="Dロイス">Dロイス</option>
-            <option value="Eロイス">Eロイス</option>
-          </select>
-        </div>
+        </label>
+        <label style="flex:1;">計算式:
+          <input type="text" id="eff-calc" value="level * 2" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        </label>
       </div>
 
-      <!-- 効果（変動値設定） -->
-      <div style="border-top:1px solid var(--border-color); padding-top:6px; margin-top:2px;">
-        <span style="font-weight:bold; color:var(--accent-gold);">自動計算用 ステータス変動設定:</span>
-        <div style="display:flex; gap:8px; margin-top:4px;">
-          <div style="flex:1;">
-            <span>対象ステータス:</span>
-            <select id="eff-stat" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-              <option value="dice">ダイス数 (dice)</option>
-              <option value="crit">クリティカル値 (crit)</option>
-              <option value="atk">攻撃力 (atk)</option>
-            </select>
-          </div>
-          <div style="flex:1;">
-            <span>計算式:</span>
-            <input type="text" id="eff-calc" value="level * 2" style="width:100%; background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:4px; border-radius:4px; margin-top:2px;">
-          </div>
-        </div>
-      </div>
+      <label>生成されるJSONプレビュー:
+        <textarea id="eff-json-output" readonly style="width:100%; height:80px; background:#0b0d12; color:#7ec8e3; border:1px solid #2a2f3a; font-family:monospace; font-size:0.65rem; padding:4px; border-radius:4px;"></textarea>
+      </label>
 
-      <div>
-        <span>生成された JSON プレビュー:</span>
-        <textarea id="eff-json-output" readonly style="width:100%; height:70px; background:#050608; border:1px solid var(--border-color); color:#a8dadc; font-family:monospace; font-size:0.75rem; padding:4px; border-radius:4px; margin-top:2px;"></textarea>
-      </div>
-    </div>
-
-    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-      <button class="btn" onclick="generateEffectJson()">JSONプレビュー更新</button>
-      <div style="display:flex; gap:4px;">
-        <button class="btn btn-gold" onclick="downloadEffectsJson()">JSONダウンロード</button>
-        <button class="btn btn-red" onclick="closeEffectModal()">閉じる</button>
-      </div>
+      <button class="btn btn-gold" onclick="downloadEffectsJson()" style="width:100%; margin-top:4px; padding:6px; font-weight:bold;">JSONをダウンロード</button>
     </div>
   </div>
 </div>
+
   <!-- スクリプトの分割読み込み（依存関係の順） -->
   <script src="main.js"></script>     <!-- 共通変数、キャラクター管理、初期化など -->
   <script src="effects.js"></script>  <!-- エフェクト関連、逆引き辞書、登録モーダルなど -->
