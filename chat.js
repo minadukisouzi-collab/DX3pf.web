@@ -56,4 +56,60 @@ function renderChatLogs() {
   logsContainer.scrollTop = logsContainer.scrollHeight;
 }
 
-// 4. メッセージ送信 
+// 4. メッセージ送信 ＆ ダイスロール判定の自動検知
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const speakerSelect = document.getElementById('chat-speaker-select');
+  if (!input || !input.value.trim()) return;
+  
+  const text = input.value.trim();
+  const speaker = speakerSelect ? speakerSelect.value : 'GM';
+
+  appendLogToTab(currentTab, speaker, text);
+
+  // ダブルクロス用ダイスパターンのマッチング (例: 8dx+2@8)
+  const diceMatch = text.match(/^(\d+)dx(?:\+(\d+))?(?:@(\d+))?$/i);
+  if (diceMatch) {
+    const num = parseInt(diceMatch[1], 10);
+    const mod = parseInt(diceMatch[2] || 0, 10);
+    const crit = parseInt(diceMatch[3] || 10, 10);
+    const res = rollDX3(num, mod, crit);
+    appendLogToTab(currentTab, '[DICE BOT]', `${speaker} の判定: ${res.detail} ➔ 【合計: ${res.total}】`);
+  }
+
+  input.value = '';
+}
+
+function appendLogToTab(tabKey, speaker, text) {
+  if (!chatLogsData[tabKey]) chatLogsData[tabKey] = [];
+  chatLogsData[tabKey].push({ speaker, text });
+  if (tabKey === currentTab) renderChatLogs();
+}
+
+function appendLog(speaker, text) {
+  appendLogToTab('main', speaker, text);
+}
+
+// 5. DX3rd 特有のクリティカルエフェクト＆スプリードを含むダイスロールエンジン
+function rollDX3(num, mod, crit) {
+  let cur = num, hist = [], total = 0, rerolls = 0;
+  if (crit < 2) crit = 2;
+  
+  while (cur > 0) {
+    let rolls = [], next = 0;
+    for (let i = 0; i < cur; i++) {
+      let r = Math.floor(Math.random() * 10) + 1;
+      rolls.push(r);
+      if (r >= crit) next++;
+    }
+    hist.push(`[${rolls.join(',')}]`);
+    if (next > 0) { 
+      rerolls++; 
+      cur = next; 
+    } else { 
+      total = (rerolls * 10) + Math.max(...rolls) + mod; 
+      break; 
+    }
+  }
+  return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
+}
