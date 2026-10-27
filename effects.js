@@ -62,7 +62,7 @@ function applyEffectByName(charId, effectName, level) {
         console.error('計算式エラー:', mod.calc);
       }
 
-      if (!char.tempModifiers) char.tempModifiers = { dice: 0, crit: 0, atk: 0 };
+      if (!char.tempModifiers) char.tempModifiers = { dice: 0, crit: 0, atk: 0, hp: 0, encroach: 0, guard: 0, armor: 0};
       
       if (mod.stat === 'dice') {
         char.tempModifiers.dice += val;
@@ -73,9 +73,21 @@ function applyEffectByName(charId, effectName, level) {
       } else if (mod.stat === 'atk') {
         char.tempModifiers.atk += val;
         appliedDetails.push(`攻撃力 ${val > 0 ? '+' + val : val}`);
+      } else if (mod.stat === 'hp') {
+        // HPの増減（マイナスならダメージやコスト、プラスなら回復）
+        char.hp = Math.max(0, (char.hp || 0) + val);
+        appliedDetails.push(`HP ${val > 0 ? '+' + val : val}`);
+      } else if (mod.stat === 'encroach') {
+        // 追加の侵蝕率変動
+        char.erosion = (char.erosion || 0) + val;
+        appliedDetails.push(`侵蝕率 +${val}%`);
+      } else if (mod.stat === 'guard') {
+        char.guardMod = (char.guardMod || 0) + val;
+        appliedDetails.push(`ガード値 ${val > 0 ? '+' + val : val}`);
+      } else if (mod.stat === 'armor') {
+        char.armorMod = (char.armorMod || 0) + val;
+        appliedDetails.push(`装甲値 ${val > 0 ? '+' + val : val}`);
       }
-    });
-  }
 
   if (typeof renderCharacters === 'function') renderCharacters();
   
