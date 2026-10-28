@@ -88,14 +88,14 @@ function applyEffectByName(charId, effectName, level) {
         char.armorMod = (char.armorMod || 0) + val;
         appliedDetails.push(`装甲値 ${val > 0 ? '+' + val : val}`);
       }
-
+  }
   if (typeof renderCharacters === 'function') renderCharacters();
   
   const detailStr = appliedDetails.length > 0 ? `（${appliedDetails.join(', ')}）` : '';
   if (typeof appendLog === 'function') {
     appendLog('[SYSTEM]', `${char.name} は【${effect.name}】（Lv.${level}）を使用！ 侵蝕率+${cost}% ${detailStr}`);
   }
-}
+  }
 
 // ==========================================
 // 3. エフェクト登録フォーム（自動採番 ＆ JSON生成）
