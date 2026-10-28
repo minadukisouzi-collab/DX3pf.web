@@ -29,6 +29,7 @@ async function loadEffectsMaster() {
 }
 
 // 2. エフェクト発動コア関数（名前ベースの逆引き対応）
+// 2. エフェクト発動コア関数（名前ベースの逆引き対応）
 function applyEffectByName(charId, effectName, level) {
   const char = characters.find(c => c.id === charId);
   if (!char) { alert('キャラクターが見つかりません'); return; }
@@ -62,7 +63,7 @@ function applyEffectByName(charId, effectName, level) {
         console.error('計算式エラー:', mod.calc);
       }
 
-      if (!char.tempModifiers) char.tempModifiers = { dice: 0, crit: 0, atk: 0, hp: 0, encroach: 0, guard: 0, armor: 0};
+      if (!char.tempModifiers) char.tempModifiers = { dice: 0, crit: 0, atk: 0, hp: 0, encroach: 0, guard: 0, armor: 0 };
       
       if (mod.stat === 'dice') {
         char.tempModifiers.dice += val;
@@ -74,11 +75,9 @@ function applyEffectByName(charId, effectName, level) {
         char.tempModifiers.atk += val;
         appliedDetails.push(`攻撃力 ${val > 0 ? '+' + val : val}`);
       } else if (mod.stat === 'hp') {
-        // HPの増減（マイナスならダメージやコスト、プラスなら回復）
         char.hp = Math.max(0, (char.hp || 0) + val);
         appliedDetails.push(`HP ${val > 0 ? '+' + val : val}`);
       } else if (mod.stat === 'encroach') {
-        // 追加の侵蝕率変動
         char.erosion = (char.erosion || 0) + val;
         appliedDetails.push(`侵蝕率 +${val}%`);
       } else if (mod.stat === 'guard') {
@@ -88,14 +87,17 @@ function applyEffectByName(charId, effectName, level) {
         char.armorMod = (char.armorMod || 0) + val;
         appliedDetails.push(`装甲値 ${val > 0 ? '+' + val : val}`);
       }
+    }); // ← forEach の閉じ括弧
   }
+
   if (typeof renderCharacters === 'function') renderCharacters();
   
   const detailStr = appliedDetails.length > 0 ? `（${appliedDetails.join(', ')}）` : '';
   if (typeof appendLog === 'function') {
     appendLog('[SYSTEM]', `${char.name} は【${effect.name}】（Lv.${level}）を使用！ 侵蝕率+${cost}% ${detailStr}`);
   }
-  }
+} // ← applyEffectByName 関数の閉じ括弧
+
 
 // ==========================================
 // 3. エフェクト登録フォーム（自動採番 ＆ JSON生成）
