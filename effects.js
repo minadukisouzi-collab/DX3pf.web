@@ -5,6 +5,7 @@
 // グローバル変数
 let effectsMasterData = {}; // GitHubから読み込むマスターデータ
 let nameToIdMap = {};       // "エフェクト名" ➔ "ID" の逆引き用辞書
+let currentModifications = []; // モーダル内で一時的に保持する効果リスト
 
 // 1. 起動時にGitHubからエフェクトマスターデータを読み込み、逆引き辞書を構築する
 async function loadEffectsMaster() {
@@ -28,7 +29,6 @@ async function loadEffectsMaster() {
   }
 }
 
-// 2. エフェクト発動コア関数（名前ベースの逆引き対応）
 // 2. エフェクト発動コア関数（名前ベースの逆引き対応）
 function applyEffectByName(charId, effectName, level) {
   const char = characters.find(c => c.id === charId);
@@ -105,12 +105,59 @@ function applyEffectByName(charId, effectName, level) {
 function openEffectModal() {
   const modal = document.getElementById('effect-modal');
   if (modal) modal.classList.add('active');
+  
+  // モーダルを開いた時に効果リストを初期化
+  currentModifications = [];
+  renderModificationList();
   updateEffectIdAuto(); // モーダルを開いた時に自動採番を実行
 }
 
 function closeEffectModal() {
   const modal = document.getElementById('effect-modal');
   if (modal) modal.classList.remove('active');
+}
+
+// 効果モジュールを1行追加する関数
+function addModificationItem() {
+  const statSelect = document.getElementById('eff-stat');
+  const calcInput = document.getElementById('eff-calc');
+  if (!statSelect || !calcInput) return;
+
+  const stat = statSelect.value;
+  const calc = calcInput.value.trim() || 'true';
+
+  currentModifications.push({ stat: stat, calc: calc });
+  renderModificationList();
+  generateEffectJson();
+}
+
+// 効果モジュールをリストから削除する関数
+function removeModificationItem(index) {
+  currentModifications.splice(index, 1);
+  renderModificationList();
+  generateEffectJson();
+}
+
+// 画面上の追加済み効果リスト描画
+function renderModificationList() {
+  const listEl = document.getElementById('eff-mod-list');
+  if (!listEl) return;
+
+  listEl.innerHTML = '';
+  if (currentModifications.length === 0) {
+    listEl.innerHTML = '<li style="color: #718096;">※効果モジュールが未登録です</li>';
+    return;
+  }
+
+  currentModifications.forEach((mod, index) => {
+    const li = document.createElement('li');
+    li.style.marginBottom = '3px';
+    li.innerHTML = `
+      <strong style="color: #63b3ed;">${mod.stat}</strong>: <span style="color: #e2e8f0;">${mod.calc}</span>
+      <button type="button" onclick="removeModificationItem(${index})" style="background: none; border: none; color: #fc8181; cursor: pointer; font-size: 0.85em; margin-left: 8px;">[削除]</button>
+    `;
+    listEl.appendChild(li);
+  });
 }
 
 // 選択されたシンドロームに応じてIDを自動採番する
@@ -152,9 +199,6 @@ function generateEffectJson() {
   const range = document.getElementById('eff-range')?.value || '視界';
   const encroach = document.getElementById('eff-encroach')?.value.trim() || '2';
   const limit = document.getElementById('eff-limit')?.value || '-';
-  
-  const stat = document.getElementById('eff-stat')?.value || 'dice';
-  const calc = document.getElementById('eff-calc')?.value.trim() || 'level * 2';
 
   const effectObj = {
     [id]: {
@@ -169,9 +213,7 @@ function generateEffectJson() {
       limit: limit,
       effect_type: "buff",
       target_type: target === "-" ? "self" : "other",
-      modifications: [
-        { stat: stat, calc: calc }
-      ]
+      modifications: currentModifications
     }
   };
 
