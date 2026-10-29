@@ -86,13 +86,18 @@
 </div>
 <!-- エフェクト登録モーダル -->
 <div id="effect-modal" class="modal-overlay">
-  <div class="modal-content" style="max-width: 600px; background: #131722; color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #2a2f3a;">
-    <h3 style="margin-top: 0; border-bottom: 1px solid #2a2f3a; padding-bottom: 8px;">エフェクトマスター登録</h3>
+  <div class="modal-content" style="max-width: 600px; width: 92%; background: #131722; color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #2a2f3a; box-sizing: border-box; max-height: 90vh; overflow-y: auto;">
+    
+    <!-- モーダルタイトル（「新規エフェクト登録（マスターデータ作成）」を復元） -->
+    <div style="font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2f3a; padding-bottom: 8px;">
+      <span style="font-size: 1.1em;">新規エフェクト登録（マスターデータ作成）</span>
+      <button class="btn" onclick="closeEffectModal()" style="background: #4a5568; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">✕</button>
+    </div>
 
     <!-- 基本情報フォーム -->
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-      <label>シンドローム:
-        <select id="eff-syndrome" onchange="updateEffectIdAuto()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+      <label style="flex: 1; min-width: 140px; font-size: 0.85em;">シンドローム:
+        <select id="eff-syndrome" onchange="updateEffectIdAuto()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px;">
           <option value="ang">エンジェルハイロゥ (ang)</option>
           <option value="bal">バロール (bal)</option>
           <option value="bdg">ブラックドッグ (bdg)</option>
@@ -109,20 +114,23 @@
           <option value="gen">汎用 (gen)</option>
         </select>
       </label>
-    </div>
-
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-      <label style="flex: 2;">エフェクト名:
-        <input type="text" id="eff-name" placeholder="例: 見えざる死神" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
-      </label>
-      <label style="flex: 1;">最大Lv:
-        <input type="number" id="eff-max-level" value="1" min="1" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      <label style="flex: 1; min-width: 100px; font-size: 0.85em;">ID:
+        <input type="text" id="eff-id" readonly style="width:100%; background:#1a1d24; color:#a0aec0; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
       </label>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-      <label style="flex: 1;">タイミング:
-        <select id="eff-timing" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+      <label style="flex: 2; min-width: 160px; font-size: 0.85em;">エフェクト名:
+        <input type="text" id="eff-name" placeholder="例: 見えざる死神" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
+      </label>
+      <label style="flex: 1; min-width: 70px; font-size: 0.85em;">最大Lv:
+        <input type="number" id="eff-max-level" value="1" min="1" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
+      </label>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+      <label style="flex: 1; min-width: 130px; font-size: 0.85em;">タイミング:
+        <select id="eff-timing" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px;">
           <option value="メジャーアクション">メジャーアクション</option>
           <option value="マイナーアクション">マイナーアクション</option>
           <option value="セットアップ">セットアップ</option>
@@ -132,17 +140,17 @@
           <option value="常時">常時</option>
         </select>
       </label>
-      <label style="flex: 1;">技能:
-        <input type="text" id="eff-skill" value="<RC>" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      <label style="flex: 1; min-width: 100px; font-size: 0.85em;">技能:
+        <input type="text" id="eff-skill" value="&lt;RC&gt;" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
       </label>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-      <label style="flex: 1;">難易度:
-        <input type="text" id="eff-difficulty" value="自動成功" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+      <label style="flex: 1; min-width: 90px; font-size: 0.85em;">難易度:
+        <input type="text" id="eff-difficulty" value="自動成功" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
       </label>
-      <label style="flex: 1;">対象:
-        <select id="eff-target-type-sel" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      <label style="flex: 1.2; min-width: 110px; font-size: 0.85em;">対象:
+        <select id="eff-target-type-sel" onchange="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px;">
           <option value="-">- (組み合わせ依存)</option>
           <option value="自身">自身</option>
           <option value="単体">単体</option>
@@ -152,17 +160,17 @@
           <option value="シーン(選択)">シーン(選択)</option>
         </select>
       </label>
-      <label style="flex: 1;">射程:
-        <input type="text" id="eff-range" value="視界" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      <label style="flex: 1; min-width: 90px; font-size: 0.85em;">射程:
+        <input type="text" id="eff-range" value="視界" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
       </label>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-      <label style="flex: 1;">侵蝕値:
-        <input type="text" id="eff-encroach" value="2" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+      <label style="flex: 1; min-width: 110px; font-size: 0.85em;">侵蝕値:
+        <input type="text" id="eff-encroach" value="2" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
       </label>
-      <label style="flex: 1;">制限:
-        <input type="text" id="eff-limit" value="-" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      <label style="flex: 1; min-width: 110px; font-size: 0.85em;">制限:
+        <input type="text" id="eff-limit" value="-" oninput="generateEffectJson()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px; box-sizing: border-box;">
       </label>
     </div>
 
@@ -170,8 +178,8 @@
     <div style="border: 1px dashed #3a4253; padding: 10px; border-radius: 6px; margin-top: 10px; background: #0f1218;">
       <div style="font-weight: bold; font-size: 0.85em; color: #8a99ad; margin-bottom: 6px;">■ 効果モジュール追加（複数登録可能）</div>
       
-      <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px;">
-        <select id="eff-stat" style="flex: 1.2; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+      <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+        <select id="eff-stat" style="flex: 2; min-width: 140px; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px;">
           <optgroup label="ステータス補正">
             <option value="dice">ダイス (dice)</option>
             <option value="crit">C値 (crit)</option>
@@ -202,33 +210,32 @@
             <option value="apply_debuff">デバフ付与 (apply_debuff)</option>
             <option value="cure_debuff">デバフ解除 (cure_debuff)</option>
           </optgroup>
-          <optgroup label="特殊・ギミック（個別処理）">
+          <optgroup label="特殊・ギミック">
             <option value="fusion">融合 (fusion)</option>
             <option value="summon_servant">赤色の従者/召喚 (summon_servant)</option>
             <option value="copy_effect">コピー/ウロボロス (copy_effect)</option>
           </optgroup>
         </select>
 
-        <input type="text" id="eff-calc" placeholder="例: level * 3 や true" value="level * 3" style="flex: 1; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:4px; border-radius:4px;">
+        <input type="text" id="eff-calc" placeholder="例: level * 3" value="level * 3" style="flex: 1.2; min-width: 90px; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; box-sizing: border-box;">
 
-        <button type="button" onclick="addModificationItem()" style="background: #2b5278; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap;">＋効果追加</button>
+        <button type="button" onclick="addModificationItem()" style="background: #2b5278; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap;">＋効果追加</button>
       </div>
 
-      <!-- 追加済み効果のリスト表示場所 -->
       <ul id="eff-mod-list" style="margin: 6px 0 0 0; padding-left: 18px; color: #cbd5e0; font-size: 0.85em;">
-        <!-- JavaScriptから動的に <li> が入ります -->
+        <!-- リスト -->
       </ul>
     </div>
 
     <!-- JSONプレビューエリア -->
     <div style="margin-top: 12px;">
       <label style="font-size: 0.85em; color: #8a99ad;">JSONプレビュー:</label>
-      <textarea id="eff-json-output" readonly style="width: 100%; height: 110px; background: #0b0d12; color: #48bb78; border: 1px solid #2a2f3a; border-radius: 4px; font-family: monospace; font-size: 0.8em; margin-top: 4px;"></textarea>
+      <textarea id="eff-json-output" readonly style="width: 100%; height: 110px; background: #0b0d12; color: #48bb78; border: 1px solid #2a2f3a; border-radius: 4px; font-family: monospace; font-size: 0.8em; margin-top: 4px; box-sizing: border-box;"></textarea>
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
-      <button type="button" onclick="downloadEffectsJson()" style="background: #38a169; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">JSONダウンロード</button>
-      <button type="button" onclick="closeEffectModal()" style="background: #4a5568; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">閉じる</button>
+      <button type="button" onclick="downloadEffectsJson()" style="background: #38a169; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">JSONダウンロード</button>
+      <button type="button" onclick="closeEffectModal()" style="background: #4a5568; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">閉じる</button>
     </div>
   </div>
 </div>
