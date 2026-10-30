@@ -110,12 +110,41 @@ async function sendMessage() {
   }
 }
 
-// 5. リアルタイム受信の設定（Supabase Realtime）
+// 初期化：過去のログをSupabaseから取得して画面に描画する
+async function loadInitialChatLogs(sessionId = 'test01') {
+  if (!window.supabaseClient) return;
+
+  const { data, error } = await window.supabaseClient
+    .from('chat_log')
+    .select('*')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('過去ログ取得エラー:', error);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    // 取得したデータを画面のログ配列にセット
+    chatLogsData[currentTab] = data.map(item => ({
+      speaker: item.speaker_name,
+      text: item.message
+    }));
+    renderChatLogs();
+  }
+}
+
+// リアルタイム受信の設定
 function subscribeToChat(sessionId = 'test01') {
   if (!window.supabaseClient) return;
 
+  // 最初に過去ログを取得する
+  loadInitialChatLogs(sessionId);
+
+  // リアルタイム変更を監視
   window.supabaseClient
-    .channel('chat-channel')
+    .channel('chat-room')
     .on(
       'postgres_changes',
       {
@@ -125,12 +154,13 @@ function subscribeToChat(sessionId = 'test01') {
         filter: `session_id=eq.${sessionId}`
       },
       (payload) => {
-        // データベースに新しいメッセージが追加されたら、画面のログに追加して描画
         const newLog = payload.new;
         appendLogToTab(currentTab, newLog.speaker_name, newLog.message);
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log('Realtime Status:', status);
+    });
 }
 
 function appendLogToTab(tabKey, speaker, text) {
