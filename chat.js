@@ -108,11 +108,6 @@ async function sendMessage() {
     // クライアントがない場合のフォールバック
     appendLogToTab(currentTab, speaker, messageToSend);
   }
-
-  } else {
-    // 万が一クライアントがない場合のフォールバック
-    appendLogToTab(currentTab, speaker, messageToSend);
-  }
 }
 
 // 初期化：過去のログをSupabaseから取得して画面に描画する
