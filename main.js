@@ -1,3 +1,10 @@
+// Supabaseの接続情報
+const SUPABASE_URL = 'https://iraddangbcsovgjiihzz.supabase.co';
+const SUPABASE_KEY = 'YOUR_ANON_KEY'; // API Settingsから取得したanonキー
+
+// 全ファイル共通で使えるようグローバル変数として保持
+window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ==========================================
 // main.js: 共通データ定義・全体初期化・キャラクター管理
 // ==========================================
