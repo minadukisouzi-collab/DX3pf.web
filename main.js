@@ -1,6 +1,6 @@
 // Supabaseの接続情報
 const SUPABASE_URL = 'https://iraddangbcsovgjiihzz.supabase.co';
-const SUPABASE_KEY = 'YOUR_ANON_KEY'; // API Settingsから取得したanonキー
+const SUPABASE_KEY = 'sb_publishable_Wo_OFiMCNAqVG1snXLOD_A_B_v_8GS_'; // API Settingsから取得したanonキー
 
 // 全ファイル共通で使えるようグローバル変数として保持
 window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
