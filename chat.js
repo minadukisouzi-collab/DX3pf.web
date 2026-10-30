@@ -139,3 +139,39 @@ function rollD10(num, mod) {
   return { total: sum + mod, rolls: rolls };
 }
 
+// メッセージ送信処理
+async function sendMessage(speakerName, messageText, sessionId = 'test01') {
+  const { data, error } = await window.supabaseClient
+    .from('chat_log')
+    .insert([
+      { 
+        session_id: sessionId, 
+        speaker_name: speakerName, 
+        message: messageText 
+      }
+    ]);
+
+  if (error) {
+    console.error('送信エラー:', error);
+  }
+}
+
+// リアルタイム受信の設定
+function subscribeToChat(sessionId = 'test01', onNewMessage) {
+  window.supabaseClient
+    .channel('chat-channel')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_log',
+        filter: `session_id=eq.${sessionId}`
+      },
+      (payload) => {
+        // 新しいメッセージが届いたときの処理
+        onNewMessage(payload.new);
+      }
+    )
+    .subscribe();
+}
