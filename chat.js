@@ -1,5 +1,5 @@
 // ==========================================
-// chat.js: チャットシステム・タブ切替・ダイスロール処理
+// chat.js: チャットシステム・タブ切替・ダイスロール処理（Supabase連携版）
 // ==========================================
 
 let currentTab = 'main';
@@ -56,16 +56,17 @@ function renderChatLogs() {
   logsContainer.scrollTop = logsContainer.scrollHeight;
 }
 
-// 4. メッセージ送信 ＆ ダイスロール判定の自動検知
-function sendMessage() {
+// 4. メッセージ送信 ＆ ダイスロール判定 ＆ Supabaseへの保存
+async function sendMessage() {
   const input = document.getElementById('chat-input');
   const speakerSelect = document.getElementById('chat-speaker-select');
   if (!input || !input.value.trim()) return;
   
   const text = input.value.trim();
   const speaker = speakerSelect ? speakerSelect.value : 'GM';
+  const sessionId = 'test01'; // 必要に応じてセッションIDを変えられます
 
-  appendLogToTab(currentTab, speaker, text);
+  let messageToSend = text;
 
   // 1. ダブルクロス用ダイスパターンのマッチング (例: 8dx+2@8)
   const diceMatch = text.match(/^(\d+)dx(?:\+(\d+))?(?:@(\d+))?$/i);
@@ -74,23 +75,62 @@ function sendMessage() {
     const mod = parseInt(diceMatch[2] || 0, 10);
     const crit = parseInt(diceMatch[3] || 10, 10);
     const res = rollDX3(num, mod, crit);
-    appendLogToTab(currentTab, '[DICE BOT]', `${speaker} の判定: ${res.detail} ➔ 【合計: ${res.total}】`);
-    input.value = '';
-    return;
-  }
-
-  // 2. 一般的な d10 ダイスロールパターンのマッチング (例: 2d10+3, 5d10)
-  const d10Match = text.match(/^(\d+)d10(?:\+(\d+))?$/i);
-  if (d10Match) {
-    const num = parseInt(d10Match[1], 10);
-    const mod = parseInt(d10Match[2] || 0, 10);
-    const res = rollD10(num, mod);
-    appendLogToTab(currentTab, '[DICE BOT]', `${speaker} のダイスロール (${num}d10${mod ? '+' + mod : ''}): [${res.rolls.join(', ')}] ➔ 【合計: ${res.total}】`);
-    input.value = '';
-    return;
+    messageToSend = `${text} ➔ ${speaker} の判定: ${res.detail} 【合計: ${res.total}】`;
+  } else {
+    // 2. 一般的な d10 ダイスロールパターンのマッチング (例: 2d10+3, 5d10)
+    const d10Match = text.match(/^(\d+)d10(?:\+(\d+))?$/i);
+    if (d10Match) {
+      const num = parseInt(d10Match[1], 10);
+      const mod = parseInt(d10Match[2] || 0, 10);
+      const res = rollD10(num, mod);
+      messageToSend = `${text} ➔ ${speaker} のダイス: [${res.rolls.join(', ')}] 【合計: ${res.total}】`;
+    }
   }
 
   input.value = '';
+
+  // Supabaseへ送信（INSERT）する
+  if (window.supabaseClient) {
+    const { error } = await window.supabaseClient
+      .from('chat_log')
+      .insert([
+        { 
+          session_id: sessionId, 
+          speaker_name: speaker, 
+          message: messageToSend 
+        }
+      ]);
+
+    if (error) {
+      console.error('Supabase送信エラー:', error);
+    }
+  } else {
+    // 万が一クライアントがない場合のフォールバック
+    appendLogToTab(currentTab, speaker, messageToSend);
+  }
+}
+
+// 5. リアルタイム受信の設定（Supabase Realtime）
+function subscribeToChat(sessionId = 'test01') {
+  if (!window.supabaseClient) return;
+
+  window.supabaseClient
+    .channel('chat-channel')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_log',
+        filter: `session_id=eq.${sessionId}`
+      },
+      (payload) => {
+        // データベースに新しいメッセージが追加されたら、画面のログに追加して描画
+        const newLog = payload.new;
+        appendLogToTab(currentTab, newLog.speaker_name, newLog.message);
+      }
+    )
+    .subscribe();
 }
 
 function appendLogToTab(tabKey, speaker, text) {
@@ -103,7 +143,7 @@ function appendLog(speaker, text) {
   appendLogToTab('main', speaker, text);
 }
 
-// 5. DX3rd 特有のクリティカルエフェクト＆スプリードを含むダイスロールエンジン
+// 6. DX3rd 特有のクリティカルエフェクト＆スプリードを含むダイスロールエンジン
 function rollDX3(num, mod, crit) {
   let cur = num, hist = [], total = 0, rerolls = 0;
   if (crit < 2) crit = 2;
@@ -137,41 +177,4 @@ function rollD10(num, mod) {
     sum += r;
   }
   return { total: sum + mod, rolls: rolls };
-}
-
-// メッセージ送信処理
-async function sendMessage(speakerName, messageText, sessionId = 'test01') {
-  const { data, error } = await window.supabaseClient
-    .from('chat_log')
-    .insert([
-      { 
-        session_id: sessionId, 
-        speaker_name: speakerName, 
-        message: messageText 
-      }
-    ]);
-
-  if (error) {
-    console.error('送信エラー:', error);
-  }
-}
-
-// リアルタイム受信の設定
-function subscribeToChat(sessionId = 'test01', onNewMessage) {
-  window.supabaseClient
-    .channel('chat-channel')
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'chat_log',
-        filter: `session_id=eq.${sessionId}`
-      },
-      (payload) => {
-        // 新しいメッセージが届いたときの処理
-        onNewMessage(payload.new);
-      }
-    )
-    .subscribe();
 }
