@@ -179,3 +179,10 @@ function closeModal() {
   const modal = document.getElementById('gm-modal');
   if (modal) modal.classList.remove('active'); 
 }
+// main.js の一番下に追記
+document.addEventListener('DOMContentLoaded', () => {
+  // リアルタイム受信の開始
+  if (typeof subscribeToChat === 'function') {
+    subscribeToChat('test01');
+  }
+});
