@@ -186,3 +186,10 @@ document.addEventListener('DOMContentLoaded', () => {
     subscribeToChat('test01');
   }
 });
+// アプリ起動時にチャットのリアルタイム受信をスタートする
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof subscribeToChat === 'function') {
+    subscribeToChat('test01');
+    console.log('チャットのリアルタイム同期を開始しました');
+  }
+});
