@@ -89,8 +89,11 @@ async function sendMessage() {
 
   input.value = '';
 
-  // Supabaseへ送信（INSERT）する
+    // Supabaseへ送信（INSERT）する
   if (window.supabaseClient) {
+    // まず自分の画面に即座に表示
+    appendLogToTab(currentTab, speaker, messageToSend);
+
     const { error } = await window.supabaseClient
       .from('chat_log')
       .insert([
@@ -103,7 +106,7 @@ async function sendMessage() {
 
     if (error) {
       console.error('Supabase送信エラー:', error);
-    }
+    }  
   } else {
     // 万が一クライアントがない場合のフォールバック
     appendLogToTab(currentTab, speaker, messageToSend);
