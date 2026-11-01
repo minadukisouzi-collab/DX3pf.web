@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DX3rd VTT - ログイン</title>
+  <style>
+    body { font-family: sans-serif, Meiryo; max-width: 400px; margin: 50px auto; padding: 20px; background: #f4f4f9; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 10px; margin-top: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button.register { background: #28a745; }
+    #message { color: red; margin-top: 10px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>VTT ログイン / 登録</h2>
+    <input type="text" id="username" placeholder="プレイヤー名 (例: ぜんざい)">
+    <input type="password" id="passcode" placeholder="パスコード (4桁など)">
+    
+    <button id="login-btn">ログインする</button>
+    <button id="register-btn" class="register">新規アカウント登録</button>
+    
+    <div id="message"></div>
+  </div>
+
+  <!-- Supabaseのクライアントライブラリ (CDN) -->
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    // ★あなたのSupabaseプロジェクトのURLと anon key を入れてください
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+    const nameInput = document.getElementById('username');
+    const passInput = document.getElementById('passcode');
+    const msgDiv = document.getElementById('message');
+
+    // 1. ログイン処理
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const name = nameInput.value.trim();
+      const passcode = passInput.value.trim();
+      if (!name || !passcode) {
+        msgDiv.textContent = '名前とパスコードを入力してください。';
+        return;
+      }
+
+      // players テーブルから一致するユーザーを検索
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('name', name)
+        .eq('passcode', passcode)
+        .single();
+
+      if (error || !data) {
+        msgDiv.textContent = 'ユーザーが見つからないか、パスコードが違います。';
+        return;
+      }
+
+      // ログイン成功：ブラウザにプレイヤーIDと名前を保存
+      localStorage.setItem('player_id', data.id);
+      localStorage.setItem('player_name', data.name);
+
+      alert(`おかえりなさい、${data.name}さん！`);
+      // TODO: 次のページ（ルーム選択画面など）へジャンプ
+      // window.location.href = 'rooms.html';
+    });
+
+    // 2. 新規登録処理
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const name = nameInput.value.trim();
+      const passcode = passInput.value.trim();
+      if (!name || !passcode) {
+        msgDiv.textContent = '新規登録する名前とパスコードを入力してください。';
+        return;
+      }
+
+      // 同名のユーザーがいないかチェック
+      const { data: existing } = await supabase
+        .from('players')
+        .select('id')
+        .eq('name', name)
+        .single();
+
+      if (existing) {
+        msgDiv.textContent = 'その名前はすでに使われています。別の名前にしてください。';
+        return;
+      }
+
+      // 新規登録の挿入
+      const { data, error } = await supabase
+        .from('players')
+        .insert([{ name: name, passcode: passcode }])
+        .select()
+        .single();
+
+      if (error) {
+        msgDiv.textContent = '登録エラー: ' + error.message;
+        return;
+      }
+
+      // 登録成功＆そのままログイン状態にして保存
+      localStorage.setItem('player_id', data.id);
+      localStorage.setItem('player_name', data.name);
+
+      alert(`アカウントを作成しました！ようこそ、${data.name}さん！`);
+      // TODO: 次のページへジャンプ
+      // window.location.href = 'rooms.html';
+    });
+  </script>
+</body>
+</html>
