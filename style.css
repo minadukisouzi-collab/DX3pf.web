@@ -186,3 +186,30 @@ header {
   #center-right-area { height: 70dvh; }
   #chat-wrapper { height: 160px; }
 }
+
+/* ── ログイン・ルーム選択用のモード切り替えボタン ── */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+  width: auto;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* ダークモード時に表示されるボタン（＝押すとライトモードになる＝ボタンの背景を白にする） */
+html[data-theme="dark"] .theme-toggle {
+  background: #ffffff;
+  color: #121214;
+  border-color: #ffffff;
+}
+
+/* ライトモード時に表示されるボタン（＝押すとダークモードになる＝ボタンの背景を黒にする） */
+html[data-theme="light"] .theme-toggle {
+  background: #121214;
+  color: #ffffff;
+  border-color: #121214;
+}
