@@ -3,173 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <title>DX3rd VTT - ログイン</title>
-  <style>
-    /* 🎨 VTT本体のカラー・質感を完全に踏襲した変数 */
-    :root[data-theme="dark"] {
-      --bg-color: #0c0c10;
-      --card-bg: #181820;
-      --header-bg: #22222f;
-      --text-color: #e2e2ec;
-      --input-bg: #111116;
-      --input-border: #333342;
-      --accent-color: #ff2a2a;
-      --accent-hover: #e01b1b;
-      --btn-text: #ffffff;
-      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    }
-
-    :root[data-theme="light"] {
-      --bg-color: #f0f0f5;
-      --card-bg: #ffffff;
-      --header-bg: #e4e4ed;
-      --text-color: #2b2b36;
-      --input-bg: #f9f9fc;
-      --input-border: #d0d0d8;
-      --accent-color: #d90429;
-      --accent-hover: #b70322;
-      --btn-text: #ffffff;
-      --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    body {
-      font-family: sans-serif, Meiryo;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      max-width: 420px;
-      margin: 80px auto;
-      padding: 20px;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--input-border);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .card-header {
-      background: var(--header-bg);
-      padding: 18px 25px;
-      border-bottom: 3px solid var(--accent-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .card-header h2 {
-      margin: 0;
-      letter-spacing: 1.5px;
-      font-size: 1.3rem;
-    }
-
-    .card-body {
-      padding: 25px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      box-sizing: border-box;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      color: var(--text-color);
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-    input:focus {
-      outline: none;
-      border-color: var(--accent-color);
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      background: var(--accent-color);
-      color: var(--btn-text);
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-    button:hover {
-      background: var(--accent-hover);
-    }
-    button:active {
-      transform: scale(0.99);
-    }
-
-    button.register {
-      background: transparent;
-      border: 1px solid var(--accent-color);
-      color: var(--accent-color);
-    }
-    button.register:hover {
-      background: var(--accent-color);
-      color: var(--btn-text);
-    }
-
-    #message {
-      color: var(--accent-color);
-      margin-top: 15px;
-      font-size: 0.9em;
-      text-align: center;
-    }
-
-    .theme-toggle {
-      background: transparent;
-      border: 1px solid var(--input-border);
-      color: var(--text-color);
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      width: auto;
-    }
-    .theme-toggle:hover {
-      background: var(--input-bg);
-      border-color: var(--accent-color);
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="card">
-    <div class="card-header">
-      <h2>DX3rd VTT</h2>
-      <button class="theme-toggle" id="toggle-theme">ライトモード</button>
-    </div>
-    
-    <div class="card-body">
-      <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 0; margin-bottom: 20px;">プレイヤー認証 / ログイン</p>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT</span>
+        <button class="btn" id="toggle-theme">ライトモード</button>
+      </div>
       
-      <input type="text" id="username" placeholder="プレイヤー名">
-      <input type="password" id="passcode" placeholder="パスコード">
-      
-      <button id="login-btn">ログイン</button>
-      <button id="register-btn" class="register">新規アカウント登録</button>
-      
-      <div id="message"></div>
+      <div class="auth-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">プレイヤー認証 / ログイン</p>
+        
+        <label style="font-size: 0.8rem;">プレイヤー名</label>
+        <input type="text" id="username" class="auth-input" placeholder="名前を入力">
+        
+        <label style="font-size: 0.8rem;">パスコード</label>
+        <input type="password" id="passcode" class="auth-input" placeholder="パスコードを入力">
+        
+        <button id="login-btn" class="btn btn-red" style="width: 100%; padding: 10px; font-weight: bold; margin-top: 5px;">ログイン</button>
+        <button id="register-btn" class="btn" style="width: 100%; padding: 10px; font-weight: bold; margin-top: 8px; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red);">新規アカウント登録</button>
+        
+        <div id="message" style="color: var(--accent-red); margin-top: 12px; font-size: 0.85rem; text-align: center;"></div>
+      </div>
     </div>
   </div>
 
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+    import { supabase } from './config.js';
 
-    const SUPABASE_URL = 'https://iraddangbcsovgjiihzz.supabase.co'
-    const SUPABASE_KEY = 'sb_publishable_Wo_OFiMCNAqVG1snXLOD_A_B_v_8GS_'
-    
-    let supabase = null;
-    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-      supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    }
-
-    // テーマ切替
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
     
@@ -180,28 +44,18 @@
     }
 
     setTheme(localStorage.getItem('theme') || 'dark');
-
     toggleBtn.addEventListener('click', () => {
-      const newTheme = htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      setTheme(newTheme);
+      setTheme(htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
 
     const nameInput = document.getElementById('username');
     const passInput = document.getElementById('passcode');
     const msgDiv = document.getElementById('message');
 
-    // ★ローカルストレージから前回入力したプレイヤー名を復元して自動セット
     const lastUsername = localStorage.getItem('last_username');
-    if (lastUsername) {
-      nameInput.value = lastUsername;
-    }
+    if (lastUsername) nameInput.value = lastUsername;
 
-    // ログイン処理
     document.getElementById('login-btn').addEventListener('click', async () => {
-      if (!supabase) {
-        msgDiv.textContent = 'SupabaseのURLとキーを設定してください。';
-        return;
-      }
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
       if (!name || !passcode) {
@@ -221,21 +75,14 @@
         return;
       }
 
-      // プレイヤー情報と、次回の入力補助用に名前を保存
       localStorage.setItem('player_id', data.id);
       localStorage.setItem('player_name', data.name);
-      localStorage.setItem('last_username', data.name); // ★追加
+      localStorage.setItem('last_username', data.name);
 
-      alert(`おかえりなさい、${data.name}さん！`);
-      // window.location.href = 'rooms.html';
+      window.location.href = 'rooms.html';
     });
 
-    // 新規登録処理
     document.getElementById('register-btn').addEventListener('click', async () => {
-      if (!supabase) {
-        msgDiv.textContent = 'SupabaseのURLとキーを設定してください。';
-        return;
-      }
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
       if (!name || !passcode) {
@@ -265,12 +112,10 @@
         return;
       }
 
-      // プレイヤー情報と名前を保存
       localStorage.setItem('player_id', data.id);
       localStorage.setItem('player_name', data.name);
-      localStorage.setItem('last_username', data.name); // ★追加
+      localStorage.setItem('last_username', data.name);
 
-      alert(`アカウントを作成しました！ようこそ、${data.name}さん！`);
       window.location.href = 'rooms.html';
     });
   </script>
