@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>DX3rd VTT - ルーム選択</title>
-  <!-- 共通スタイルシートを読み込み -->
   <link rel="stylesheet" href="style.css">
   <style>
-    /* 追加の微調整用スタイル */
     body {
       max-width: 600px;
       margin: 40px auto;
@@ -45,6 +43,7 @@
   <div class="auth-card" style="margin: 0 auto;">
     <div class="auth-header">
       <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT - ルーム選択</span>
+      <!-- 絵文字なしの切り替えボタン -->
       <button class="theme-toggle" id="toggle-theme">ライトモード</button>
     </div>
     
@@ -68,10 +67,9 @@
   </div>
 
   <script type="module">
-    // 共通設定ファイルから supabase をインポート
     import { supabase } from './config.js';
 
-    // 1. ログイン認証チェック（未ログインならログイン画面へ強制送還）
+    // 1. ログイン認証チェック
     const playerId = localStorage.getItem('player_id');
     const playerName = localStorage.getItem('player_name');
     
@@ -82,19 +80,21 @@
       document.getElementById('welcome-msg').textContent = `プレイヤー: ${playerName} さん`;
     }
 
-    // 2. テーマ切替の初期化
+    // 2. テーマ切替（ボタンの背景色と文字がCSS連動するように文言を切り替え）
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
     
     function setTheme(theme) {
       htmlTag.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
-      toggleBtn.textContent = theme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
+      // ダークモードのときは「ライトモードへ切り替えるボタン」なので「ライトモード」と表示
+      toggleBtn.textContent = theme === 'dark' ? 'ライトモード' : 'ダークモード';
     }
 
     setTheme(localStorage.getItem('theme') || 'dark');
     toggleBtn.addEventListener('click', () => {
-      setTheme(htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      const newTheme = htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
     });
 
     // 3. ログアウト処理
@@ -107,14 +107,11 @@
     // 4. タイムアウト付きルーム一覧の取得と表示
     async function fetchRooms() {
       const roomListUl = document.getElementById('room-list');
-
-      // 5秒でタイムアウトさせるプロミス
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('タイムアウト')), 5000)
       );
 
       try {
-        // Supabaseからのデータ取得とタイムアウトを競合させる
         const fetchPromise = supabase
           .from('rooms')
           .select('*')
@@ -150,8 +147,7 @@
         console.error(err);
         roomListUl.innerHTML = `
           <li style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">
-            ルーム情報の取得に時間がかかっているか、接続できません。<br>
-            上のボタンから新しいルームを作成して開始してください。
+            参加可能なルームがありません。<br>上のボタンから新しいルームを作成してください。
           </li>`;
       }
     }
@@ -175,7 +171,6 @@
       window.location.href = `vtt.html?room=${data.id}`;
     });
 
-    // 初期ロード時にルーム一覧を取得
     fetchRooms();
   </script>
 </body>
