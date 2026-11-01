@@ -3,105 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>DX3rd VTT - ルーム選択</title>
+  <!-- 共通スタイルシートを読み込み -->
+  <link rel="stylesheet" href="style.css">
   <style>
-    /* 🎨 VTT本体・ログイン画面と共通のカラーテーマ */
-    :root[data-theme="dark"] {
-      --bg-color: #0c0c10;
-      --card-bg: #181820;
-      --header-bg: #22222f;
-      --text-color: #e2e2ec;
-      --input-bg: #111116;
-      --input-border: #333342;
-      --accent-color: #ff2a2a;
-      --accent-hover: #e01b1b;
-      --btn-text: #ffffff;
-      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    }
-
-    :root[data-theme="light"] {
-      --bg-color: #f0f0f5;
-      --card-bg: #ffffff;
-      --header-bg: #e4e4ed;
-      --text-color: #2b2b36;
-      --input-bg: #f9f9fc;
-      --input-border: #d0d0d8;
-      --accent-color: #d90429;
-      --accent-hover: #b70322;
-      --btn-text: #ffffff;
-      --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    }
-
+    /* 追加の微調整用スタイル */
     body {
-      font-family: sans-serif, Meiryo;
-      background-color: var(--bg-color);
-      color: var(--text-color);
       max-width: 600px;
       margin: 40px auto;
       padding: 20px;
-      transition: background 0.3s, color 0.3s;
     }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--input-border);
-      overflow: hidden;
-      margin-bottom: 20px;
+    .auth-card {
+      max-width: 100%;
     }
-
-    .card-header {
-      background: var(--header-bg);
-      padding: 18px 25px;
-      border-bottom: 3px solid var(--accent-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .card-header h2 {
-      margin: 0;
-      letter-spacing: 1.5px;
-      font-size: 1.3rem;
-    }
-
-    .card-body {
-      padding: 25px;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: var(--accent-color);
-      color: var(--btn-text);
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: var(--accent-hover);
-    }
-
-    button.secondary {
-      background: transparent;
-      border: 1px solid var(--accent-color);
-      color: var(--accent-color);
-    }
-    button.secondary:hover {
-      background: var(--accent-color);
-      color: var(--btn-text);
-    }
-
     .room-list {
       list-style: none;
       padding: 0;
       margin: 0;
     }
-
     .room-item {
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
       padding: 15px;
       margin-bottom: 10px;
       border-radius: 4px;
@@ -109,25 +30,9 @@
       justify-content: space-between;
       align-items: center;
     }
-
-    .theme-toggle {
-      background: transparent;
-      border: 1px solid var(--input-border);
-      color: var(--text-color);
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      width: auto;
-    }
-    .theme-toggle:hover {
-      background: var(--input-bg);
-      border-color: var(--accent-color);
-    }
-
     .user-info {
       font-size: 0.9rem;
-      opacity: 0.8;
+      color: var(--text-muted);
       margin-bottom: 15px;
       display: flex;
       justify-content: space-between;
@@ -137,42 +42,39 @@
 </head>
 <body>
 
-  <div class="card">
-    <div class="card-header">
-      <h2>DX3rd VTT - ルーム選択</h2>
-      <button class="theme-toggle" id="toggle-theme">☀️ ライトモード</button>
+  <div class="auth-card" style="margin: 0 auto;">
+    <div class="auth-header">
+      <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT - ルーム選択</span>
+      <button class="btn" id="toggle-theme" style="width: auto; padding: 5px 10px; font-size: 0.75rem;">☀️ ライトモード</button>
     </div>
     
-    <div class="card-body">
+    <div class="auth-body">
       <div class="user-info">
         <span id="welcome-msg">ログイン中ユーザー: 読み込み中...</span>
-        <button class="secondary" id="logout-btn" style="padding: 5px 10px; font-size: 0.8rem;">ログアウト</button>
+        <button class="btn" id="logout-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red);">ログアウト</button>
       </div>
 
-      <hr style="border: none; border-top: 1px solid var(--input-border); margin: 20px 0;">
+      <hr style="border: none; border-top: 1px solid var(--border-color); margin: 15px 0;">
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; font-size: 1.1rem;">参加可能なルーム一覧</h3>
-        <button id="create-room-btn">＋ 新規ルーム作成</button>
+        <h3 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">参加可能なルーム一覧</h3>
+        <button id="create-room-btn" class="btn btn-red" style="width: auto; padding: 8px 14px;">＋ 新規ルーム作成</button>
       </div>
 
       <ul class="room-list" id="room-list">
-        <li style="text-align: center; padding: 20px; opacity: 0.6;">ルームを読み込み中...</li>
+        <li style="text-align: center; padding: 20px; color: var(--text-muted);">ルームを読み込み中...</li>
       </ul>
     </div>
   </div>
 
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-
-    // ★ログイン画面と同じSupabase設定を入れてください
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL'
-    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+    // 共通設定ファイルから supabase をインポート
+    import { supabase } from './config.js';
 
     // 1. ログイン認証チェック（未ログインならログイン画面へ強制送還）
     const playerId = localStorage.getItem('player_id');
     const playerName = localStorage.getItem('player_name');
+    
     if (!playerId) {
       alert('ログインしてください。');
       window.location.href = 'signin.html';
@@ -180,7 +82,7 @@
       document.getElementById('welcome-msg').textContent = `プレイヤー: ${playerName} さん`;
     }
 
-    // 2. テーマ切替
+    // 2. テーマ切替の初期化
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
     
@@ -191,10 +93,8 @@
     }
 
     setTheme(localStorage.getItem('theme') || 'dark');
-
     toggleBtn.addEventListener('click', () => {
-      const newTheme = htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      setTheme(newTheme);
+      setTheme(htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
 
     // 3. ログアウト処理
@@ -204,38 +104,56 @@
       window.location.href = 'signin.html';
     });
 
-    // 4. ルーム一覧の取得と表示
+    // 4. タイムアウト付きルーム一覧の取得と表示
     async function fetchRooms() {
       const roomListUl = document.getElementById('room-list');
-      
-      const { data: rooms, error } = await supabase
-        .from('rooms')
-        .select('*')
-        .order('created_at', { ascending: false });
 
-      if (error) {
-        roomListUl.innerHTML = `<li style="color: var(--accent-color); text-align: center;">ルームの取得に失敗しました: ${error.message}</li>`;
-        return;
+      // 5秒でタイムアウトさせるプロミス
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('タイムアウト')), 5000)
+      );
+
+      try {
+        // Supabaseからのデータ取得とタイムアウトを競合させる
+        const fetchPromise = supabase
+          .from('rooms')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        const { data: rooms, error } = await Promise.race([fetchPromise, timeoutPromise]);
+
+        if (error) throw error;
+
+        if (!rooms || rooms.length === 0) {
+          roomListUl.innerHTML = `
+            <li style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">
+              参加可能なルームがありません。<br>上の「新規ルーム作成」からセッション部屋を作成してください。
+            </li>`;
+          return;
+        }
+
+        roomListUl.innerHTML = '';
+        rooms.forEach(room => {
+          const li = document.createElement('li');
+          li.className = 'room-item';
+          li.innerHTML = `
+            <div>
+              <strong style="color: var(--text-main);">${room.name || '無題のルーム'}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">ID: ${room.id}</div>
+            </div>
+            <button class="btn btn-blue" onclick="window.location.href='vtt.html?room=${room.id}'">入室する</button>
+          `;
+          roomListUl.appendChild(li);
+        });
+
+      } catch (err) {
+        console.error(err);
+        roomListUl.innerHTML = `
+          <li style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">
+            ルーム情報の取得に時間がかかっているか、接続できません。<br>
+            上のボタンから新しいルームを作成して開始してください。
+          </li>`;
       }
-
-      if (!rooms || rooms.length === 0) {
-        roomListUl.innerHTML = `<li style="text-align: center; padding: 20px; opacity: 0.6;">ルームがありません。「新規ルーム作成」から部屋を作ってください。</li>`;
-        return;
-      }
-
-      roomListUl.innerHTML = '';
-      rooms.forEach(room => {
-        const li = document.createElement('li');
-        li.className = 'room-item';
-        li.innerHTML = `
-          <div>
-            <strong>${room.name || '無題のルーム'}</strong>
-            <div style="font-size: 0.8rem; opacity: 0.6; margin-top: 4px;">ID: ${room.id}</div>
-          </div>
-          <button onclick="window.location.href='vtt.html?room=${room.id}'">入室する</button>
-        `;
-        roomListUl.appendChild(li);
-      });
     }
 
     // 5. 新規ルーム作成処理
@@ -254,7 +172,6 @@
         return;
       }
 
-      // 作成成功したらそのままVTT本体へジャンプ
       window.location.href = `vtt.html?room=${data.id}`;
     });
 
