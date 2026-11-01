@@ -11,8 +11,22 @@
   --border-color: #2a2f3a;
 }
 
+/* ライトモード時の変数上書き設定 */
+:root[data-theme="light"] {
+  --bg-main: #f0f0f5;
+  --bg-card: #ffffff;
+  --bg-header: #e4e4ed;
+  --accent-red: #d90429;
+  --accent-blue: #1d3557;
+  --accent-purple: #560bad;
+  --accent-gold: #c29b00;
+  --text-main: #2b2b36;
+  --text-muted: #457b9d;
+  --border-color: #d0d0d8;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; }
-html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background-color: var(--bg-main); color: var(--text-main); }
+html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background-color: var(--bg-main); color: var(--text-main); transition: background 0.3s, color 0.3s; }
 #app-container { display: flex; flex-direction: column; width: 100vw; height: 100dvh; }
 
 header {
@@ -44,23 +58,23 @@ header {
 
 .char-card { background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px; margin-bottom: 6px; }
 .char-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-.char-name { font-weight: bold; font-size: 0.9rem; color: #fff; }
+.char-name { font-weight: bold; font-size: 0.9rem; color: var(--text-main); }
 .stat-row { display: flex; align-items: center; gap: 4px; margin-top: 3px; font-size: 0.75rem; }
-.stat-row input[type="number"] { width: 40px; background: var(--bg-main); border: 1px solid var(--border-color); color: #fff; padding: 2px; border-radius: 3px; text-align: right; }
+.stat-row input[type="number"] { width: 40px; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 2px; border-radius: 3px; text-align: right; }
 
 .bs-icon-container { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
-.bs-badge { display: inline-flex; align-items: center; padding: 1px 4px; font-size: 0.6rem; border-radius: 3px; background: #2b2d42; border: 1px solid #4a4e69; color: #edf2f4; }
+.bs-badge { display: inline-flex; align-items: center; padding: 1px 4px; font-size: 0.6rem; border-radius: 3px; background: var(--bg-header); border: 1px solid var(--border-color); color: var(--text-main); }
 .bs-badge.type-hard { border-color: #d4a373; }
 .bs-badge.type-pressure { border-color: #8d99ae; }
 .bs-badge.type-poison { border-color: #52b788; }
-.bs-badge.type-berserk { border-color: #e63946; font-weight: bold; }
+.bs-badge.type-berserk { border-color: var(--accent-red); font-weight: bold; }
 
 #center-right-area { flex: 1; display: flex; flex-direction: column; position: relative; height: 100%; overflow: hidden; }
-#board-wrapper { flex: 1; position: relative; background: #050608; overflow: hidden; cursor: grab; }
-#board-viewport { position: absolute; top: 0; left: 0; width: 2000px; height: 2000px; transform-origin: 0 0; background-image: radial-gradient(#2a2f3a 1px, transparent 1px); background-size: 40px 40px; }
+#board-wrapper { flex: 1; position: relative; background: var(--bg-main); overflow: hidden; cursor: grab; }
+#board-viewport { position: absolute; top: 0; left: 0; width: 2000px; height: 2000px; transform-origin: 0 0; background-image: radial-gradient(var(--border-color) 1px, transparent 1px); background-size: 40px 40px; }
 
 .token { position: absolute; cursor: move; display: flex; flex-direction: column; align-items: center; z-index: 2; }
-.token-name { background: rgba(0,0,0,0.75); padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; margin-top: 2px; white-space: nowrap; }
+.token-name { background: rgba(0,0,0,0.75); color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; margin-top: 2px; white-space: nowrap; }
 
 .board-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 8; }
 
@@ -74,14 +88,8 @@ header {
   transition: height 0.2s ease;
 }
 
-/* 畳んだ時に完全に入力欄が見える高さ（48px）に修正 */
-#chat-wrapper.collapsed {
-  height: 48px !important;
-}
-
-#chat-wrapper.collapsed #chat-logs {
-  display: none !important;
-}
+#chat-wrapper.collapsed { height: 48px !important; }
+#chat-wrapper.collapsed #chat-logs { display: none !important; }
 
 .chat-tabs-bar {
   display: flex;
@@ -120,14 +128,57 @@ header {
 .log-name { font-weight: bold; color: var(--accent-blue); margin-right: 4px; }
 
 .chat-input-area { padding: 6px; display: flex; gap: 4px; background: var(--bg-header); }
-.chat-input-area input[type="text"] { flex: 1; background: var(--bg-main); border: 1px solid var(--border-color); color: #fff; padding: 4px; border-radius: 4px; font-size: 0.8rem; }
+.chat-input-area input[type="text"] { flex: 1; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 4px; border-radius: 4px; font-size: 0.8rem; }
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; }
 .modal-overlay.active { display: flex; }
 .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; width: 420px; max-width: 90vw; padding: 12px; }
 .bs-toggle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 6px; }
-.bs-toggle-btn { padding: 5px; font-size: 0.65rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 4px; text-align: center; color: #fff; }
+.bs-toggle-btn { padding: 5px; font-size: 0.65rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 4px; text-align: center; color: var(--text-main); }
 .bs-toggle-btn.active { background: var(--accent-red); border-color: var(--accent-red); font-weight: bold; }
+
+/* ── 追加：ログイン・ルーム選択画面用の共通カードデザイン ── */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100dvh;
+  padding: 20px;
+}
+.auth-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+.auth-header {
+  background: var(--bg-header);
+  padding: 18px 20px;
+  border-bottom: 3px solid var(--accent-red);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.auth-body {
+  padding: 20px;
+}
+.auth-input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0 14px 0;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent-red);
+}
 
 @media (max-width: 768px) {
   #main-content { flex-direction: column; }
