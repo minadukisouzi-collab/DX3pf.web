@@ -5,13 +5,16 @@
   <title>DX3rd VTT - ルーム選択</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-    }
+    /* ルーム選択画面専用の微調整（スクロールが必要になったときの対策） */
     .auth-card {
-      max-width: 100%;
+      width: 100%;
+      max-width: 520px; /* ルーム一覧が見やすいように少しだけ広めに */
+      max-height: 85dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    .auth-body {
+      overflow-y: auto; /* ルームが増えてもカード内でスクロールできるように */
     }
     .room-list {
       list-style: none;
@@ -21,7 +24,7 @@
     .room-item {
       background: var(--bg-main);
       border: 1px solid var(--border-color);
-      padding: 15px;
+      padding: 12px 15px;
       margin-bottom: 10px;
       border-radius: 4px;
       display: flex;
@@ -40,29 +43,31 @@
 </head>
 <body>
 
-  <div class="auth-card" style="margin: 0 auto;">
-    <div class="auth-header">
-      <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT - ルーム選択</span>
-      <!-- 絵文字なしの切り替えボタン -->
-      <button class="theme-toggle" id="toggle-theme">ライトモード</button>
-    </div>
-    
-    <div class="auth-body">
-      <div class="user-info">
-        <span id="welcome-msg">ログイン中ユーザー: 読み込み中...</span>
-        <button class="btn" id="logout-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red);">ログアウト</button>
+  <!-- ログイン画面と共通のコンテナで完全に中央配置に固定 -->
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT - ルーム選択</span>
+        <button class="theme-toggle" id="toggle-theme">ライトモード</button>
       </div>
+      
+      <div class="auth-body">
+        <div class="user-info">
+          <span id="welcome-msg">ログイン中ユーザー: 読み込み中...</span>
+          <button class="btn" id="logout-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red);">ログアウト</button>
+        </div>
 
-      <hr style="border: none; border-top: 1px solid var(--border-color); margin: 15px 0;">
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 15px 0;">
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">参加可能なルーム一覧</h3>
-        <button id="create-room-btn" class="btn btn-red" style="width: auto; padding: 8px 14px;">＋ 新規ルーム作成</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">参加可能なルーム一覧</h3>
+          <button id="create-room-btn" class="btn btn-red" style="width: auto; padding: 8px 14px;">＋ 新規ルーム作成</button>
+        </div>
+
+        <ul class="room-list" id="room-list">
+          <li style="text-align: center; padding: 20px; color: var(--text-muted);">ルームを読み込み中...</li>
+        </ul>
       </div>
-
-      <ul class="room-list" id="room-list">
-        <li style="text-align: center; padding: 20px; color: var(--text-muted);">ルームを読み込み中...</li>
-      </ul>
     </div>
   </div>
 
@@ -75,19 +80,18 @@
     
     if (!playerId) {
       alert('ログインしてください。');
-      window.location.href = 'signin.html';
+      window.location.href = 'index.html'; // ログイン画面（index.html）へ
     } else {
       document.getElementById('welcome-msg').textContent = `プレイヤー: ${playerName} さん`;
     }
 
-    // 2. テーマ切替（ボタンの背景色と文字がCSS連動するように文言を切り替え）
+    // 2. テーマ切替
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
     
     function setTheme(theme) {
       htmlTag.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
-      // ダークモードのときは「ライトモードへ切り替えるボタン」なので「ライトモード」と表示
       toggleBtn.textContent = theme === 'dark' ? 'ライトモード' : 'ダークモード';
     }
 
@@ -97,7 +101,7 @@
       setTheme(newTheme);
     });
 
-    // 3. ログアウト処理
+    // 3. ログアウト処理（確実におうち＝index.htmlへ戻す）
     document.getElementById('logout-btn').addEventListener('click', () => {
       localStorage.removeItem('player_id');
       localStorage.removeItem('player_name');
