@@ -12,7 +12,7 @@
       --text-color: #e2e2ec;
       --input-bg: #111116;
       --input-border: #333342;
-      --accent-color: #ff2a2a; /* 本体の赤アクセント */
+      --accent-color: #ff2a2a;
       --accent-hover: #e01b1b;
       --btn-text: #ffffff;
       --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
@@ -50,7 +50,6 @@
       position: relative;
     }
 
-    /* VTT本体のヘッダー帯を意識したタイトルエリア */
     .card-header {
       background: var(--header-bg);
       padding: 18px 25px;
@@ -122,7 +121,6 @@
       text-align: center;
     }
 
-    /* モード切り替えボタン（ヘッダー内配置） */
     .theme-toggle {
       background: transparent;
       border: 1px solid var(--input-border);
@@ -163,30 +161,28 @@
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    // ★あなたのSupabaseのURLとキーに書き換えてください
     const SUPABASE_URL = 'https://iraddangbcsovgjiihzz.supabase.co'
     const SUPABASE_KEY = 'sb_publishable_Wo_OFiMCNAqVG1snXLOD_A_B_v_8GS_'
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+    
+    let supabase = null;
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
 
+    // テーマ切替
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
     
     function setTheme(theme) {
       htmlTag.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
-      if (theme === 'dark') {
-        toggleBtn.textContent = 'ライトモード';
-      } else {
-        toggleBtn.textContent = 'ダークモード';
-      }
+      toggleBtn.textContent = theme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
     }
 
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
+    setTheme(localStorage.getItem('theme') || 'dark');
 
     toggleBtn.addEventListener('click', () => {
-      const currentTheme = htmlTag.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      const newTheme = htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       setTheme(newTheme);
     });
 
@@ -194,8 +190,18 @@
     const passInput = document.getElementById('passcode');
     const msgDiv = document.getElementById('message');
 
+    // ★ローカルストレージから前回入力したプレイヤー名を復元して自動セット
+    const lastUsername = localStorage.getItem('last_username');
+    if (lastUsername) {
+      nameInput.value = lastUsername;
+    }
+
     // ログイン処理
     document.getElementById('login-btn').addEventListener('click', async () => {
+      if (!supabase) {
+        msgDiv.textContent = 'SupabaseのURLとキーを設定してください。';
+        return;
+      }
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
       if (!name || !passcode) {
@@ -208,22 +214,28 @@
         .select('*')
         .eq('name', name)
         .eq('passcode', passcode)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         msgDiv.textContent = 'ユーザーが見つからないか、パスコードが違います。';
         return;
       }
 
+      // プレイヤー情報と、次回の入力補助用に名前を保存
       localStorage.setItem('player_id', data.id);
       localStorage.setItem('player_name', data.name);
+      localStorage.setItem('last_username', data.name); // ★追加
 
       alert(`おかえりなさい、${data.name}さん！`);
-      // window.location.href = 'rooms.html'; // ルーム選択画面へ
+      // window.location.href = 'rooms.html';
     });
 
     // 新規登録処理
     document.getElementById('register-btn').addEventListener('click', async () => {
+      if (!supabase) {
+        msgDiv.textContent = 'SupabaseのURLとキーを設定してください。';
+        return;
+      }
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
       if (!name || !passcode) {
@@ -235,7 +247,7 @@
         .from('players')
         .select('id')
         .eq('name', name)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         msgDiv.textContent = 'その名前はすでに使われています。';
@@ -253,8 +265,10 @@
         return;
       }
 
+      // プレイヤー情報と名前を保存
       localStorage.setItem('player_id', data.id);
       localStorage.setItem('player_name', data.name);
+      localStorage.setItem('last_username', data.name); // ★追加
 
       alert(`アカウントを作成しました！ようこそ、${data.name}さん！`);
       // window.location.href = 'rooms.html';
