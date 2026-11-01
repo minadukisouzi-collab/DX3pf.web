@@ -4,22 +4,24 @@
   <meta charset="UTF-8">
   <title>DX3rd VTT - ログイン</title>
   <style>
-    /* 🎨 カラーテーマの定義（CSS変数）: VTT本体に寄せたダーク＆レッド基調 */
+    /* 🎨 VTT本体のカラー・質感を完全に踏襲した変数 */
     :root[data-theme="dark"] {
-      --bg-color: #0b0b0e;
-      --card-bg: #16161c;
+      --bg-color: #0c0c10;
+      --card-bg: #181820;
+      --header-bg: #22222f;
       --text-color: #e2e2ec;
-      --input-bg: #22222d;
+      --input-bg: #111116;
       --input-border: #333342;
-      --accent-color: #ff2a2a; /* 鮮やかな赤 */
+      --accent-color: #ff2a2a; /* 本体の赤アクセント */
       --accent-hover: #e01b1b;
       --btn-text: #ffffff;
-      --card-shadow: 0 4px 20px rgba(255, 42, 42, 0.15);
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
 
     :root[data-theme="light"] {
       --bg-color: #f0f0f5;
       --card-bg: #ffffff;
+      --header-bg: #e4e4ed;
       --text-color: #2b2b36;
       --input-bg: #f9f9fc;
       --input-border: #d0d0d8;
@@ -33,26 +35,39 @@
       font-family: sans-serif, Meiryo;
       background-color: var(--bg-color);
       color: var(--text-color);
-      max-width: 400px;
-      margin: 60px auto;
+      max-width: 420px;
+      margin: 80px auto;
       padding: 20px;
       transition: background 0.3s, color 0.3s;
     }
 
     .card {
       background: var(--card-bg);
-      padding: 30px 25px;
-      border-radius: 6px;
+      border-radius: 8px;
       box-shadow: var(--card-shadow);
-      border-top: 3px solid var(--accent-color);
+      border: 1px solid var(--input-border);
+      overflow: hidden;
       position: relative;
     }
 
-    h2 {
-      margin-top: 0;
-      margin-bottom: 5px;
+    /* VTT本体のヘッダー帯を意識したタイトルエリア */
+    .card-header {
+      background: var(--header-bg);
+      padding: 18px 25px;
+      border-bottom: 3px solid var(--accent-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h2 {
+      margin: 0;
       letter-spacing: 1.5px;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
+    }
+
+    .card-body {
+      padding: 25px;
     }
 
     input {
@@ -107,20 +122,15 @@
       text-align: center;
     }
 
-    /* モード切り替えボタン */
+    /* モード切り替えボタン（ヘッダー内配置） */
     .theme-toggle {
-      position: absolute;
-      top: 25px;
-      right: 25px;
       background: transparent;
       border: 1px solid var(--input-border);
       color: var(--text-color);
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
-      width: auto;
       font-size: 0.75rem;
-      font-weight: normal;
     }
     .theme-toggle:hover {
       background: var(--input-bg);
@@ -131,18 +141,22 @@
 <body>
 
   <div class="card">
-    <button class="theme-toggle" id="toggle-theme">☀️ ライトモードへ</button>
+    <div class="card-header">
+      <h2>DX3rd VTT</h2>
+      <button class="theme-toggle" id="toggle-theme">☀️ ライトモード</button>
+    </div>
     
-    <h2>DX3rd VTT</h2>
-    <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 25px;">プレイヤー認証 / ログイン</p>
-    
-    <input type="text" id="username" placeholder="プレイヤー名">
-    <input type="password" id="passcode" placeholder="パスコード">
-    
-    <button id="login-btn">ログイン</button>
-    <button id="register-btn" class="register">新規アカウント登録</button>
-    
-    <div id="message"></div>
+    <div class="card-body">
+      <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 0; margin-bottom: 20px;">プレイヤー認証 / ログイン</p>
+      
+      <input type="text" id="username" placeholder="プレイヤー名">
+      <input type="password" id="passcode" placeholder="パスコード">
+      
+      <button id="login-btn">ログイン</button>
+      <button id="register-btn" class="register">新規アカウント登録</button>
+      
+      <div id="message"></div>
+    </div>
   </div>
 
   <script type="module">
@@ -155,22 +169,19 @@
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
     
-    // テーマ適用とボタン文言を更新する関数
     function setTheme(theme) {
       htmlTag.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
       if (theme === 'dark') {
-        toggleBtn.textContent = '☀️ ライトモードへ';
+        toggleBtn.textContent = '☀️ ライトモード';
       } else {
-        toggleBtn.textContent = '🌙 ダークモードへ';
+        toggleBtn.textContent = '🌙 ダークモード';
       }
     }
 
-    // 初期テーマのロード（保存されているもの、なければダーク）
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
 
-    // 切替ボタンのクリックイベント
     toggleBtn.addEventListener('click', () => {
       const currentTheme = htmlTag.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -235,7 +246,7 @@
         .select()
         .single();
 
-      if (error) {
+            if (error) {
         msgDiv.textContent = '登録エラー: ' + error.message;
         return;
       }
@@ -249,3 +260,4 @@
   </script>
 </body>
 </html>
+
