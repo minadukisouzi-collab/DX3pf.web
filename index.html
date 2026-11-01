@@ -142,7 +142,7 @@
   <div class="card">
     <div class="card-header">
       <h2>DX3rd VTT</h2>
-      <button class="theme-toggle" id="toggle-theme">☀️ ライトモード</button>
+      <button class="theme-toggle" id="toggle-theme">ライトモード</button>
     </div>
     
     <div class="card-body">
@@ -176,7 +176,7 @@
     function setTheme(theme) {
       htmlTag.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
-      toggleBtn.textContent = theme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
+      toggleBtn.textContent = theme === 'dark' ? 'ライトモード' : 'ダークモード';
     }
 
     setTheme(localStorage.getItem('theme') || 'dark');
