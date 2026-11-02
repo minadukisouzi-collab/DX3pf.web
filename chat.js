@@ -37,13 +37,13 @@ export function initChatSystem(supabaseClient, roomId, playerName) {
 export function switchChatTab(tabKey) {
   currentTab = tabKey;
   const tabs = document.querySelectorAll('.chat-tab');
-  tabs.forEach(t => t.classList.remove('active'));
+//  tabs.forEach(t => t.classList.remove('active'));
   
-  const tabArray = Array.from(tabs);
-  const targetTab = tabArray.find(t => t.getAttribute('onclick')?.includes(tabKey));
-  if (targetTab) targetTab.classList.add('active');
+//  const tabArray = Array.from(tabs);
+//  const targetTab = tabArray.find(t => t.getAttribute('onclick')?.includes(tabKey));
+//  if (targetTab) targetTab.classList.add('active');
 
-  renderChatLogs();
+//  renderChatLogs();
 }
 
 // 2. チャットパネルの折りたたみトグル
