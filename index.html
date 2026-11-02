@@ -26,7 +26,8 @@
         <button id="login-btn" class="btn btn-red" style="width: 100%; padding: 10px; font-weight: bold; margin-top: 5px;">ログイン</button>
         <button id="register-btn" class="btn" style="width: 100%; padding: 10px; font-weight: bold; margin-top: 8px; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red);">新規アカウント登録</button>
         
-        <div id="message" style="color: var(--accent-red); margin-top: 12px; font-size: 0.85rem; text-align: center;"></div>
+        <!-- エラーや状態を表示する領域 -->
+        <div id="message" style="color: var(--accent-red); margin-top: 12px; font-size: 0.8rem; text-align: center; word-break: break-all;"></div>
       </div>
     </div>
   </div>
@@ -55,7 +56,7 @@
     const lastUsername = localStorage.getItem('last_username');
     if (lastUsername) nameInput.value = lastUsername;
 
-    // ログイン処理（ログイン成功時にオンライン状態を有効化し、現在地をロビー null にセット）
+    // ログイン処理
     document.getElementById('login-btn').addEventListener('click', async () => {
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
@@ -64,6 +65,8 @@
         return;
       }
 
+      msgDiv.textContent = 'ログイン処理中...';
+
       const { data, error } = await supabase
         .from('players')
         .select('*')
@@ -71,13 +74,17 @@
         .eq('passcode', passcode)
         .maybeSingle();
 
-      if (error || !data) {
+      if (error) {
+        msgDiv.textContent = '取得エラー: ' + error.message;
+        return;
+      }
+      if (!data) {
         msgDiv.textContent = 'ユーザーが見つからないか、パスコードが違います。';
         return;
       }
 
-      // ログイン成功時にオンラインステータスを更新
-      await supabase
+      // オンライン状態に更新
+      const { error: updateError } = await supabase
         .from('players')
         .update({
           is_online: true,
@@ -86,6 +93,12 @@
         })
         .eq('id', data.id);
 
+      if (updateError) {
+        msgDiv.textContent = 'ステータス更新エラー: ' + updateError.message;
+        console.error('Update Error:', updateError);
+        return;
+      }
+
       localStorage.setItem('player_id', data.id);
       localStorage.setItem('player_name', data.name);
       localStorage.setItem('last_username', data.name);
@@ -93,7 +106,7 @@
       window.location.href = 'rooms.html';
     });
 
-    // 新規登録処理（登録と同時にオンライン状態＆ロビー滞在としてデータをINSERT）
+    // 新規登録処理
     document.getElementById('register-btn').addEventListener('click', async () => {
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
@@ -101,6 +114,8 @@
         msgDiv.textContent = '登録する名前とパスコードを入力してください。';
         return;
       }
+
+      msgDiv.textContent = '登録処理中...';
 
       const { data: existing } = await supabase
         .from('players')
@@ -127,6 +142,7 @@
 
       if (error) {
         msgDiv.textContent = '登録エラー: ' + error.message;
+        console.error('Insert Error:', error);
         return;
       }
 
