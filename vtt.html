@@ -358,14 +358,27 @@
       window.location.href = 'rooms.html';
     });
 
-    // ② ダークモード / ライトモード切り替え機能
+        // ② ダークモード / ライトモード切り替え機能
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
 
     function setTheme(theme) {
       htmlTag.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
-      toggleBtn.textContent = theme === 'dark' ? 'ライトモード' : 'ダークモード';
+
+      if (theme === 'dark') {
+        // ダークモード表示のときはボタンを「黒（暗い背景色）」に設定
+        toggleBtn.textContent = 'ライトモード';
+        toggleBtn.style.background = '#131722';
+        toggleBtn.style.color = '#edf2f4';
+        toggleBtn.style.borderColor = '#2a2f3a';
+      } else {
+        // ライトモード表示のときはボタンを「白（明るい背景色）」に設定
+        toggleBtn.textContent = 'ダークモード';
+        toggleBtn.style.background = '#ffffff';
+        toggleBtn.style.color = '#131722';
+        toggleBtn.style.borderColor = '#cccccc';
+      }
     }
 
     setTheme(localStorage.getItem('theme') || 'dark');
