@@ -1,5 +1,5 @@
 // ==========================================
-// chat.js: チャットシステム・タブ切替・ダイスロール処理（モジュール版）
+// chat.js: チャットシステム・タブ切替・ダイスロール処理（モジュール版・デバッグ切り分け用）
 // ==========================================
 
 let currentTab = 'main';
@@ -83,18 +83,21 @@ function renderChatLogs() {
   logsContainer.scrollTop = logsContainer.scrollHeight;
 }
 
+// 4. メッセージ送信（デバッグ切り分け用）
 export async function sendMessage() {
   const input = document.getElementById('chat-input');
   const speakerSelect = document.getElementById('chat-speaker-select');
 
-  // デバッグ用：何が足りていないか画面上で確認する
+  // ガード条件のチェック
   if (!currentSessionId) {
-    alert('エラー: currentSessionId が取得できていません');
+    alert('【エラー】currentSessionId が取得できていません');
     return;
   }
-  if (!input || !input.value.trim()) return;
+  if (!input || !input.value.trim()) {
+    return; // 入力値が空の場合は何もしない
+  }
   if (!supabaseInstance) {
-    alert('エラー: supabaseInstance が初期化されていません');
+    alert('【エラー】supabaseInstance が初期化されていません');
     return;
   }
   
@@ -102,6 +105,28 @@ export async function sendMessage() {
   const speaker = speakerSelect ? speakerSelect.value : 'GM';
   let messageToSend = text;
 
+  // -------------------------------------------------------------------------
+  // 【ステップ1】まずはボタンが反応しているか・ローカル描画ができるかのテスト
+  // -------------------------------------------------------------------------
+  alert('【デバッグ】sendMessage関数が正常に呼び出されました！');
+
+  if (!chatLogsData[currentTab]) {
+    chatLogsData[currentTab] = [];
+  }
+  chatLogsData[currentTab].push({
+    speaker: speaker,
+    text: messageToSend
+  });
+  renderChatLogs();
+  input.value = '';
+
+  alert('【デバッグ】画面へのローカル描画が完了しました。次からSupabase送信を有効にします。');
+
+
+  /* =========================================================================
+     【ステップ2解除用】以下のコメントアウトを外すと、ダイス計算とSupabase送信が有効になります
+     =========================================================================
+  
   // ダイス判定 (DX3rd & d10)
   const diceMatch = text.match(/^(\d+)dx(?:\+(\d+))?(?:@(\d+))?$/i);
   if (diceMatch) {
@@ -120,8 +145,6 @@ export async function sendMessage() {
     }
   }
 
-  input.value = '';
-
   // session_id に rooms.id を入れて保存
   const { error } = await supabaseInstance
     .from('chat_log')
@@ -135,7 +158,12 @@ export async function sendMessage() {
 
   if (error) {
     console.error('Supabase送信エラー:', error);
+    alert('Supabase送信エラー: ' + JSON.stringify(error));
+  } else {
+    alert('Supabaseへのデータ保存が成功しました！');
   }
+
+  ========================================================================= */
 }
 
 // 5. 過去ログ取得（rooms.id と一致する session_id のみを抽出）
