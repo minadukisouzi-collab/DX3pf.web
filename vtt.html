@@ -1,29 +1,38 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DX3rd Online Session Platform</title>
   <link rel="stylesheet" href="style.css">
   <meta name="robots" content="noindex, nofollow">
-<!-- SupabaseのJavaScriptライブラリ読み込み -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SupabaseのJavaScriptライブラリ読み込み -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
 <div id="app-container">
   <header>
-    <div class="title-logo">DX3rd VTT</div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="title-logo">DX3rd VTT</div>
+      <button class="btn" id="leave-room-btn" style="width: auto; padding: 2px 8px; font-size: 0.7rem; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); cursor: pointer;">ロビーに戻る</button>
+    </div>
+    
     <div class="timeline-bar">
       <div class="timeline-item">
         <span style="color:var(--accent-gold); font-weight:bold;">Phase:</span>
-        <span id="current-phase-text" style="color:#fff;">オープニングフェイズ</span>
+        <span id="current-phase-text" style="color:var(--text-main);">オープニングフェイズ</span>
       </div>
-      <div class="timeline-item"><span>Sc:</span> <input type="number" id="scene-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;" readonly></div>
-      <div class="timeline-item"><span>Rd:</span> <input type="number" id="round-num" value="1" style="width:25px; background:transparent; color:#fff; border:none;" readonly></div>
+      <div class="timeline-item"><span>Sc:</span> <input type="number" id="scene-num" value="1" style="width:25px; background:transparent; color:var(--text-main); border:none;" readonly></div>
+      <div class="timeline-item"><span>Rd:</span> <input type="number" id="round-num" value="1" style="width:25px; background:transparent; color:var(--text-main); border:none;" readonly></div>
       
       <!-- 通常モード / 戦闘モードの切り替えエリア -->
       <div id="mode-controls" style="display:flex; gap:4px; align-items:center;"></div>
+    </div>
+
+    <!-- ② ダークモード / ライトモード切り替えボタン -->
+    <div style="display: flex; align-items: center;">
+      <button class="theme-toggle" id="toggle-theme" style="background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">ライトモード</button>
     </div>
   </header>
 
@@ -31,13 +40,13 @@
     <div id="char-sidebar">
       <div class="sidebar-section">
         <!-- キャラクター一覧タイトルの部分 -->
-          <div class="sidebar-title">
-             <span>キャラクター一覧</span>
-             <div style="display:flex; gap:4px;">
-                  <button class="btn btn-purple" onclick="openEffectModal()" style="font-size:0.7rem;">+ エフェクト追加</button>
-                  <button class="btn" onclick="addCharacter()">+ キャラ追加</button>
-            </div>
+        <div class="sidebar-title">
+          <span>キャラクター一覧</span>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-purple" onclick="openEffectModal()" style="font-size:0.7rem;">+ エフェクト追加</button>
+            <button class="btn" onclick="addCharacter()">+ キャラ追加</button>
           </div>
+        </div>
         <div id="character-list"></div>
       </div>
     </div>
@@ -54,16 +63,29 @@
 
       <div id="chat-wrapper">
         <div class="chat-tabs-bar">
+          <!-- ③ チャットタブ欄に「メンバー」タブを追加 -->
           <div class="chat-tabs" id="chat-tabs-list">
             <div class="chat-tab active" onclick="switchChatTab('main')">メイン</div>
             <div class="chat-tab" onclick="switchChatTab('sub')">雑談</div>
             <div class="chat-tab" onclick="switchChatTab('info')">情報</div>
+            <div class="chat-tab" onclick="switchChatTab('members')">メンバー</div>
           </div>
           <button class="chat-toggle-btn" id="chat-toggle-btn" onclick="toggleChatPanel()">▼ 畳む</button>
         </div>
+
+        <!-- ログ表示エリア ＋ メンバーリスト表示用コンテナ -->
         <div id="chat-logs"></div>
-        <div class="chat-input-area">
-          <select id="chat-speaker-select" style="background:#0b0d12; color:#fff; border:1px solid #2a2f3a; border-radius:4px; max-width:80px;">
+        
+        <!-- メンバータブ選択時に表示する専用コンテナ（初期非表示） -->
+        <div id="room-members-container" style="display: none; flex: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem;">
+          <div style="font-weight: bold; margin-bottom: 6px; color: var(--accent-gold);">ルーム参加メンバー</div>
+          <ul id="room-member-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;">
+            <li style="color: var(--text-muted); font-size: 0.75rem;">読み込み中...</li>
+          </ul>
+        </div>
+
+        <div class="chat-input-area" id="chat-input-area-box">
+          <select id="chat-speaker-select" style="background:var(--bg-main); color:var(--text-main); border:1px solid var(--border-color); border-radius:4px; max-width:80px;">
             <option value="GM">GM</option>
           </select>
           <input type="text" id="chat-input" placeholder="ダイス例: 7dx+3@8 または メッセージ" onkeydown="if(event.key==='Enter') sendMessage()">
@@ -86,17 +108,16 @@
     </div>
   </div>
 </div>
+
 <!-- エフェクト登録モーダル -->
 <div id="effect-modal" class="modal-overlay">
   <div class="modal-content" style="max-width: 600px; width: 92%; background: #131722; color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #2a2f3a; box-sizing: border-box; max-height: 90vh; overflow-y: auto;">
     
-    <!-- モーダルタイトル（「新規エフェクト登録（マスターデータ作成）」を復元） -->
     <div style="font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2f3a; padding-bottom: 8px;">
       <span style="font-size: 1.1em;">新規エフェクト登録（マスターデータ作成）</span>
       <button class="btn" onclick="closeEffectModal()" style="background: #4a5568; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">✕</button>
     </div>
 
-    <!-- 基本情報フォーム -->
     <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
       <label style="flex: 1; min-width: 140px; font-size: 0.85em;">シンドローム:
         <select id="eff-syndrome" onchange="updateEffectIdAuto()" style="width:100%; background:#0b0d12; color:#fff; border:1px solid #2a2f3a; padding:6px; border-radius:4px; margin-top:2px;">
@@ -176,7 +197,6 @@
       </label>
     </div>
 
-    <!-- 複数効果追加（モジュール）エリア -->
     <div style="border: 1px dashed #3a4253; padding: 10px; border-radius: 6px; margin-top: 10px; background: #0f1218;">
       <div style="font-weight: bold; font-size: 0.85em; color: #8a99ad; margin-bottom: 6px;">■ 効果モジュール追加（複数登録可能）</div>
       
@@ -224,12 +244,9 @@
         <button type="button" onclick="addModificationItem()" style="background: #2b5278; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap;">＋効果追加</button>
       </div>
 
-      <ul id="eff-mod-list" style="margin: 6px 0 0 0; padding-left: 18px; color: #cbd5e0; font-size: 0.85em;">
-        <!-- リスト -->
-      </ul>
+      <ul id="eff-mod-list" style="margin: 6px 0 0 0; padding-left: 18px; color: #cbd5e0; font-size: 0.85em;"></ul>
     </div>
 
-    <!-- JSONプレビューエリア -->
     <div style="margin-top: 12px;">
       <label style="font-size: 0.85em; color: #8a99ad;">JSONプレビュー:</label>
       <textarea id="eff-json-output" readonly style="width: 100%; height: 110px; background: #0b0d12; color: #48bb78; border: 1px solid #2a2f3a; border-radius: 4px; font-family: monospace; font-size: 0.8em; margin-top: 4px; box-sizing: border-box;"></textarea>
@@ -241,11 +258,120 @@
     </div>
   </div>
 </div>
+
   <!-- スクリプトの分割読み込み（依存関係の順） -->
   <script src="main.js"></script>     <!-- 共通変数、キャラクター管理、初期化など -->
   <script src="effects.js"></script>  <!-- エフェクト関連、逆引き辞書、登録モーダルなど -->
   <script src="battle.js"></script>   <!-- フェーズ・戦闘プロセス管理など -->
   <script src="board.js"></script>    <!-- トークン移動、マップのズーム・パンなど -->
-  <script src="chat.js"></script>     <!-- チャット、タブ切替、ダイスロールなど -->
+  
+  <!-- チャットおよびルーム固有ロジック（モジュール構造維持版） -->
+  <script type="module">
+    import { supabase } from './config.js';
+    import { initChatSystem, switchChatTab, toggleChatPanel } from './chat.js';
+
+    // グローバル公開（HTMLの onclick から呼び出すため）
+    window.switchChatTab = function(tabKey) {
+      const logsEl = document.getElementById('chat-logs');
+      const membersEl = document.getElementById('room-members-container');
+      const inputAreaEl = document.getElementById('chat-input-area-box');
+
+      if (tabKey === 'members') {
+        if (logsEl) logsEl.style.display = 'none';
+        if (inputAreaEl) inputAreaEl.style.display = 'none';
+        if (membersEl) membersEl.style.display = 'flex';
+        
+        // タブのアクティブ状態切替
+        document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        fetchRoomMembers();
+      } else {
+        if (logsEl) logsEl.style.display = 'flex';
+        if (inputAreaEl) inputAreaEl.style.display = 'flex';
+        if (membersEl) membersEl.style.display = 'none';
+        switchChatTab(tabKey);
+      }
+    };
+
+    window.toggleChatPanel = toggleChatPanel;
+
+    // ① ルームIDの固着問題解消：URLパラメータからルームIDを確実に取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('room');
+    const playerId = localStorage.getItem('player_id');
+    const playerName = localStorage.getItem('player_name');
+
+    if (!playerId) {
+      alert('ログインしてください。');
+      window.location.href = 'index.html';
+    }
+
+    if (!roomId) {
+      alert('ルームIDが指定されていません。');
+      window.location.href = 'rooms.html';
+    }
+
+    // チャットシステムへ固有のルームIDを確実に引き渡して初期化
+    initChatSystem(supabase, roomId, playerName);
+
+    // ルームメンバーリストの取得関数
+    async function fetchRoomMembers() {
+      const memberListUl = document.getElementById('room-member-list');
+      if (!memberListUl) return;
+
+      const { data: members, error } = await supabase
+        .from('players')
+        .select('name, is_online, current_room_id')
+        .eq('is_online', true)
+        .eq('current_room_id', roomId);
+
+      if (error || !members || members.length === 0) {
+        memberListUl.innerHTML = `<li style="color: var(--text-muted); font-size: 0.75rem;">参加中のメンバーがいません</li>`;
+        return;
+      }
+
+      memberListUl.innerHTML = '';
+      members.forEach(m => {
+        const li = document.createElement('li');
+        li.style.cssText = "background: var(--bg-main); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;";
+        li.innerHTML = `<span>🟢 ${m.name}</span>`;
+        memberListUl.appendChild(li);
+      });
+    }
+
+    // 在室ステータス（ハートビート）の更新
+    async function updatePresence() {
+      await supabase
+        .from('players')
+        .update({ is_online: true, current_room_id: roomId, last_seen_at: new Date().toISOString() })
+        .eq('id', playerId);
+    }
+    updatePresence();
+    setInterval(updatePresence, 5000);
+
+    // ロビーに戻るボタン
+    document.getElementById('leave-room-btn').addEventListener('click', async () => {
+      await supabase
+        .from('players')
+        .update({ current_room_id: null })
+        .eq('id', playerId);
+      window.location.href = 'rooms.html';
+    });
+
+    // ② ダークモード / ライトモード切り替え機能の横展開
+    const htmlTag = document.documentElement;
+    const toggleBtn = document.getElementById('toggle-theme');
+
+    function setTheme(theme) {
+      htmlTag.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      toggleBtn.textContent = theme === 'dark' ? 'ライトモード' : 'ダークモード';
+    }
+
+    setTheme(localStorage.getItem('theme') || 'dark');
+    toggleBtn.addEventListener('click', () => {
+      setTheme(htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  </script>
 </body>
 </html>
