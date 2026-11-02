@@ -3,6 +3,8 @@
 // ==========================================
 
 let currentTab = 'main';
+let currentSessionId = 'test01'; // 動的に変更可能なセッションID
+
 let chatLogsData = {
   main: [{ speaker: '[SYSTEM]', text: 'メインスレッドへようこそ。ダイス例: 8dx+2@8' }],
   sub:  [{ speaker: '[SYSTEM]', text: '雑談スレッドです。自由にお使いください。' }],
@@ -10,6 +12,13 @@ let chatLogsData = {
 };
 
 let isChatCollapsed = false;
+
+// 0. 外部（vtt.html等）からセッションID（ルームID）をセットする関数
+function setChatSession(sessionId) {
+  if (sessionId) {
+    currentSessionId = sessionId;
+  }
+}
 
 // 1. チャットタブ切替
 function switchChatTab(tabKey) {
@@ -46,6 +55,11 @@ function renderChatLogs() {
   logsContainer.innerHTML = '';
 
   const logs = chatLogsData[currentTab] || [];
+  if (logs.length === 0) {
+    logsContainer.innerHTML = `<div style="color: var(--text-muted); text-align: center; font-size: 0.75rem; margin-top: 10px;">メッセージはまだありません</div>`;
+    return;
+  }
+
   logs.forEach(log => {
     const item = document.createElement('div');
     item.className = 'log-item';
@@ -64,8 +78,7 @@ async function sendMessage() {
   
   const text = input.value.trim();
   const speaker = speakerSelect ? speakerSelect.value : 'GM';
-  const sessionId = 'test01'; // 必要に応じてセッションIDを変えられます
-
+  
   let messageToSend = text;
 
   // 1. ダブルクロス用ダイスパターンのマッチング (例: 8dx+2@8)
@@ -89,13 +102,13 @@ async function sendMessage() {
 
   input.value = '';
 
-  // Supabaseへ送信（INSERT）する
+  // 現在のルームのセッションIDを使ってSupabaseへ送信（INSERT）する
   if (window.supabaseClient) {
     const { error } = await window.supabaseClient
       .from('chat_log')
       .insert([
         { 
-          session_id: sessionId, 
+          session_id: currentSessionId, 
           speaker_name: speaker, 
           message: messageToSend 
         }
@@ -105,19 +118,19 @@ async function sendMessage() {
       console.error('Supabase送信エラー:', error);
     }  
   } else {
-    // クライアントがない場合のフォールバック
     appendLogToTab(currentTab, speaker, messageToSend);
   }
 }
 
 // 初期化：過去のログをSupabaseから取得して画面に描画する
-async function loadInitialChatLogs(sessionId = 'test01') {
+async function loadInitialChatLogs(sessionId) {
+  if (sessionId) currentSessionId = sessionId;
   if (!window.supabaseClient) return;
 
   const { data, error } = await window.supabaseClient
     .from('chat_log')
     .select('*')
-    .eq('session_id', sessionId)
+    .eq('session_id', currentSessionId)
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -126,32 +139,35 @@ async function loadInitialChatLogs(sessionId = 'test01') {
   }
 
   if (data && data.length > 0) {
-    // 取得したデータを画面のログ配列にセット
     chatLogsData[currentTab] = data.map(item => ({
       speaker: item.speaker_name,
       text: item.message
     }));
-    renderChatLogs();
+  } else {
+    // ログが一件もない場合は空にする
+    chatLogsData[currentTab] = [];
   }
+  renderChatLogs();
 }
 
 // リアルタイム受信の設定
-function subscribeToChat(sessionId = 'test01') {
+function subscribeToChat(sessionId) {
+  if (sessionId) currentSessionId = sessionId;
   if (!window.supabaseClient) return;
 
   // 最初に過去ログを取得する
-  loadInitialChatLogs(sessionId);
+  loadInitialChatLogs(currentSessionId);
 
-  // リアルタイム変更を監視
+  // リアルタイム変更を監視（現在のセッションIDに一致するものだけ）
   window.supabaseClient
-    .channel('chat-room')
+    .channel(`chat-room-${currentSessionId}`)
     .on(
       'postgres_changes',
       {
         event: 'INSERT',
         schema: 'public',
         table: 'chat_log',
-        filter: `session_id=eq.${sessionId}`
+        filter: `session_id=eq.${currentSessionId}`
       },
       (payload) => {
         const newLog = payload.new;
