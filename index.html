@@ -12,7 +12,6 @@
       <div class="auth-header">
         <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT</span>
         <button class="theme-toggle" id="toggle-theme">ライトモード</button>
-
       </div>
       
       <div class="auth-body">
@@ -56,6 +55,7 @@
     const lastUsername = localStorage.getItem('last_username');
     if (lastUsername) nameInput.value = lastUsername;
 
+    // ログイン処理（ログイン成功時にオンライン状態を有効化し、現在地をロビー null にセット）
     document.getElementById('login-btn').addEventListener('click', async () => {
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
@@ -76,6 +76,16 @@
         return;
       }
 
+      // ログイン成功時にオンラインステータスを更新
+      await supabase
+        .from('players')
+        .update({
+          is_online: true,
+          current_room_id: null,
+          last_seen_at: new Date().toISOString()
+        })
+        .eq('id', data.id);
+
       localStorage.setItem('player_id', data.id);
       localStorage.setItem('player_name', data.name);
       localStorage.setItem('last_username', data.name);
@@ -83,6 +93,7 @@
       window.location.href = 'rooms.html';
     });
 
+    // 新規登録処理（登録と同時にオンライン状態＆ロビー滞在としてデータをINSERT）
     document.getElementById('register-btn').addEventListener('click', async () => {
       const name = nameInput.value.trim();
       const passcode = passInput.value.trim();
@@ -104,7 +115,13 @@
 
       const { data, error } = await supabase
         .from('players')
-        .insert([{ name: name, passcode: passcode }])
+        .insert([{ 
+          name: name, 
+          passcode: passcode,
+          is_online: true,
+          current_room_id: null,
+          last_seen_at: new Date().toISOString()
+        }])
         .select()
         .single();
 
