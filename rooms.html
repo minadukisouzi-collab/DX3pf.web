@@ -2,71 +2,190 @@
 <html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <title>DX3rd VTT - ルーム選択</title>
+  <title>DX3rd VTT - 出発ロビー</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ルーム選択画面専用の微調整（スクロールが必要になったときの対策） */
     .auth-card {
       width: 100%;
-      max-width: 520px; /* ルーム一覧が見やすいように少しだけ広めに */
-      max-height: 85dvh;
+      max-width: 700px;
+      max-height: 90dvh;
       display: flex;
       flex-direction: column;
     }
     .auth-body {
-      overflow-y: auto; /* ルームが増えてもカード内でスクロールできるように */
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
-    .room-list {
+    .lobby-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 15px;
+    }
+    @media (max-width: 600px) {
+      .lobby-grid { grid-template-columns: 1fr; }
+    }
+    .room-list, .member-list {
       list-style: none;
       padding: 0;
       margin: 0;
+      max-height: 160px;
+      overflow-y: auto;
     }
-    .room-item {
+    .room-item, .member-item {
       background: var(--bg-main);
       border: 1px solid var(--border-color);
-      padding: 12px 15px;
-      margin-bottom: 10px;
+      padding: 8px 12px;
+      margin-bottom: 6px;
       border-radius: 4px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 0.85rem;
     }
     .user-info {
       font-size: 0.9rem;
       color: var(--text-muted);
-      margin-bottom: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    /* ロビーチャット専用 */
+    .lobby-chat-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      height: 140px;
+    }
+    .lobby-logs {
+      flex: 1;
+      padding: 8px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .lobby-input-area {
+      display: flex;
+      padding: 6px;
+      background: var(--bg-header);
+      border-top: 1px solid var(--border-color);
+      gap: 6px;
+    }
+    .lobby-input-area input {
+      flex: 1;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin: 0;
+    }
+    /* 延長確認モーダル用スタイル */
+    #logout-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: var(--bg-card, #181820);
+      border: 1px solid var(--border-color);
+      padding: 25px;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
   </style>
 </head>
 <body>
 
-  <!-- ログイン画面と共通のコンテナで完全に中央配置に固定 -->
+  <!-- 自動ログアウト警告・延長モーダル -->
+  <div id="logout-modal">
+    <div class="modal-content">
+      <h3 style="margin-top: 0; color: var(--text-main); font-size: 1.1rem;">無操作状態の検知</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">
+        一定時間操作がなかったため、まもなく自動ログアウトします。<br>セッションを続行しますか？
+      </p>
+      <div style="display: flex; justify-content: center; gap: 10px;">
+        <button id="extend-btn" class="btn" style="background: #2b8a3e; color: #fff; padding: 6px 16px; font-size: 0.85rem; width: auto;">延長する</button>
+        <button id="force-logout-btn" class="btn" style="background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); padding: 6px 12px; font-size: 0.85rem; width: auto;">今すぐログアウト</button>
+      </div>
+    </div>
+  </div>
+
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
-        <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT - ルーム選択</span>
-        <button class="theme-toggle" id="toggle-theme">ライトモード</button>
+        <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT - 出発ロビー</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- 自動ログアウト時間設定プルダウン（無効なし、最長120分） -->
+          <select id="timeout-setting" title="自動ログアウト時間" style="background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 6px; font-size: 0.75rem; cursor: pointer;">
+            <option value="15">自動: 15分</option>
+            <option value="30">自動: 30分</option>
+            <option value="60">自動: 60分</option>
+            <option value="120" selected>自動: 120分</option>
+          </select>
+          <button class="theme-toggle" id="toggle-theme">ライトモード</button>
+        </div>
       </div>
       
       <div class="auth-body">
+        <!-- ユーザー情報 & ログアウト -->
         <div class="user-info">
-          <span id="welcome-msg">ログイン中ユーザー: 読み込み中...</span>
+          <span id="welcome-msg">ログイン中: 読み込み中...</span>
           <button class="btn" id="logout-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red);">ログアウト</button>
         </div>
 
-        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 15px 0;">
+        <!-- 2カラム：ルーム一覧 ＆ ロビーにいるメンバー -->
+        <div class="lobby-grid">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <h3 style="margin: 0; font-size: 0.95rem; color: var(--text-main);">参加可能なルーム</h3>
+              <button id="create-room-btn" class="btn btn-red" style="width: auto; padding: 4px 10px; font-size: 0.75rem;">＋ 新規作成</button>
+            </div>
+            <ul class="room-list" id="room-list">
+              <li style="text-align: center; padding: 15px; color: var(--text-muted); font-size: 0.8rem;">読み込み中...</li>
+            </ul>
+          </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-          <h3 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">参加可能なルーム一覧</h3>
-          <button id="create-room-btn" class="btn btn-red" style="width: auto; padding: 8px 14px;">＋ 新規ルーム作成</button>
+          <div>
+            <h3 style="margin: 0 0 6px 0; font-size: 0.95rem; color: var(--text-main);">ロビーのメンバー</h3>
+            <ul class="member-list" id="member-list">
+              <li style="text-align: center; padding: 15px; color: var(--text-muted); font-size: 0.8rem;">取得中...</li>
+            </ul>
+          </div>
         </div>
 
-        <ul class="room-list" id="room-list">
-          <li style="text-align: center; padding: 20px; color: var(--text-muted);">ルームを読み込み中...</li>
-        </ul>
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0;">
+
+        <!-- ロビーチャットセクション -->
+        <div>
+          <h3 style="margin: 0 0 6px 0; font-size: 0.95rem; color: var(--text-main);">ロビーチャット</h3>
+          <div class="lobby-chat-box">
+            <div class="lobby-logs" id="lobby-logs">
+              <div style="color: var(--text-muted); text-align: center; margin-top: 10px; font-size: 0.75rem;">メッセージを読み込み中...</div>
+            </div>
+            <div class="lobby-input-area">
+              <input type="text" id="lobby-input" placeholder="ロビーで発言する...">
+              <button id="lobby-send-btn" class="btn" style="width: auto; padding: 4px 12px; font-size: 0.8rem;">送信</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -74,18 +193,113 @@
   <script type="module">
     import { supabase } from './config.js';
 
-    // 1. ログイン認証チェック
     const playerId = localStorage.getItem('player_id');
     const playerName = localStorage.getItem('player_name');
     
     if (!playerId) {
       alert('ログインしてください。');
-      window.location.href = 'index.html'; // ログイン画面（index.html）へ
+      window.location.href = 'index.html';
     } else {
       document.getElementById('welcome-msg').textContent = `プレイヤー: ${playerName} さん`;
     }
 
-    // 2. テーマ切替
+    // 1. ログイン状態の初期化 & 定期的な生存確認（ハートビート）
+    async function updatePresence() {
+      await supabase
+        .from('players')
+        .update({
+          is_online: true,
+          current_room_id: null,
+          last_seen_at: new Date().toISOString()
+        })
+        .eq('id', playerId);
+    }
+
+    updatePresence();
+    const heartbeatInterval = setInterval(updatePresence, 5000);
+
+    // 2. ユーザー設定可能な自動ログアウト & 延長モーダル制御（最長120分、無効化なし）
+    const timeoutSelect = document.getElementById('timeout-setting');
+    const logoutModal = document.getElementById('logout-modal');
+    const extendBtn = document.getElementById('extend-btn');
+    const forceLogoutBtn = document.getElementById('force-logout-btn');
+
+    // 保存された設定を反映（デフォルトは120分）
+    const savedTimeout = localStorage.getItem('idle_timeout_min');
+    if (savedTimeout !== null) {
+      timeoutSelect.value = savedTimeout;
+    }
+
+    let idleTimer = null;
+    let countdownTimer = null;
+
+    function startIdleTimer() {
+      clearTimeout(idleTimer);
+      const minutes = parseInt(timeoutSelect.value, 10) || 120;
+      const delayMs = minutes * 60 * 1000;
+
+      idleTimer = setTimeout(() => {
+        // 時間が来たらモーダルを表示
+        logoutModal.style.display = 'flex';
+
+        // モーダル表示後、さらに60秒間応答がなければ強制的にログアウト
+        clearTimeout(countdownTimer);
+        countdownTimer = setTimeout(async () => {
+          alert('操作がなかったため、自動ログアウトしました。');
+          await performLogout();
+        }, 60000); // 猶予1分
+
+      }, delayMs);
+    }
+
+    // 設定変更時の保存とタイマー再起動
+    timeoutSelect.addEventListener('change', () => {
+      localStorage.setItem('idle_timeout_min', timeoutSelect.value);
+      startIdleTimer();
+    });
+
+    // 「延長する」ボタンを押したときの処理
+    extendBtn.addEventListener('click', () => {
+      clearTimeout(countdownTimer);
+      logoutModal.style.display = 'none';
+      startIdleTimer(); // タイマーをリセットして再スタート
+    });
+
+    // 「今すぐログアウト」ボタンを押したときの処理
+    forceLogoutBtn.addEventListener('click', async () => {
+      clearTimeout(countdownTimer);
+      await performLogout();
+    });
+
+    // ユーザーの操作（マウス、キーボード、クリックなど）でタイマーをリセット
+    ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
+      window.addEventListener(event, () => {
+        if (logoutModal.style.display !== 'flex') {
+          startIdleTimer();
+        }
+      });
+    });
+
+    startIdleTimer(); // 初期起動
+
+    async function performLogout() {
+      clearInterval(heartbeatInterval);
+      clearTimeout(idleTimer);
+      clearTimeout(countdownTimer);
+
+      await supabase
+        .from('players')
+        .update({ is_online: false, current_room_id: null })
+        .eq('id', playerId);
+
+      localStorage.removeItem('player_id');
+      localStorage.removeItem('player_name');
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', performLogout);
+
+    // 3. テーマ切替
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
     
@@ -94,67 +308,71 @@
       localStorage.setItem('theme', theme);
       toggleBtn.textContent = theme === 'dark' ? 'ライトモード' : 'ダークモード';
     }
-
     setTheme(localStorage.getItem('theme') || 'dark');
     toggleBtn.addEventListener('click', () => {
-      const newTheme = htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      setTheme(newTheme);
+      setTheme(htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
 
-    // 3. ログアウト処理（確実におうち＝index.htmlへ戻す）
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      localStorage.removeItem('player_id');
-      localStorage.removeItem('player_name');
-      window.location.href = 'index.html';
-    });
-
-    // 4. タイムアウト付きルーム一覧の取得と表示
-    async function fetchRooms() {
+    // 4. ルーム一覧 & ロビーメンバー & チャットの同期取得
+    async function fetchLobbyData() {
       const roomListUl = document.getElementById('room-list');
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('タイムアウト')), 5000)
-      );
+      const { data: rooms } = await supabase.from('rooms').select('*').order('created_at', { ascending: false });
 
-      try {
-        const fetchPromise = supabase
-          .from('rooms')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        const { data: rooms, error } = await Promise.race([fetchPromise, timeoutPromise]);
-
-        if (error) throw error;
-
-        if (!rooms || rooms.length === 0) {
-          roomListUl.innerHTML = `
-            <li style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">
-              参加可能なルームがありません。<br>上の「新規ルーム作成」からセッション部屋を作成してください。
-            </li>`;
-          return;
-        }
-
+      if (!rooms || rooms.length === 0) {
+        roomListUl.innerHTML = `<li style="text-align: center; padding: 10px; color: var(--text-muted); font-size: 0.75rem;">ルームがありません</li>`;
+      } else {
         roomListUl.innerHTML = '';
         rooms.forEach(room => {
           const li = document.createElement('li');
           li.className = 'room-item';
           li.innerHTML = `
-            <div>
-              <strong style="color: var(--text-main);">${room.name || '無題のルーム'}</strong>
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">ID: ${room.id}</div>
-            </div>
-            <button class="btn btn-blue" onclick="window.location.href='vtt.html?room=${room.id}'">入室する</button>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">${room.name}</span>
+            <button class="btn btn-blue" onclick="moveToRoom('${room.id}')" style="padding: 3px 8px; font-size: 0.7rem;">入室</button>
           `;
           roomListUl.appendChild(li);
         });
+      }
 
-      } catch (err) {
-        console.error(err);
-        roomListUl.innerHTML = `
-          <li style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">
-            参加可能なルームがありません。<br>上のボタンから新しいルームを作成してください。
-          </li>`;
+      const memberListUl = document.getElementById('member-list');
+      const { data: members } = await supabase
+        .from('players')
+        .select('name')
+        .eq('is_online', true)
+        .is('current_room_id', null);
+
+      if (!members || members.length === 0) {
+        memberListUl.innerHTML = `<li style="text-align: center; padding: 10px; color: var(--text-muted); font-size: 0.75rem;">誰もいません</li>`;
+      } else {
+        memberListUl.innerHTML = '';
+        members.forEach(m => {
+          const li = document.createElement('li');
+          li.className = 'member-item';
+          li.innerHTML = `<span>🟢 ${m.name}</span>`;
+          memberListUl.appendChild(li);
+        });
+      }
+
+      const { data: chats } = await supabase.from('lobby_chats').select('*').order('created_at', { ascending: true }).limit(40);
+      const lobbyLogs = document.getElementById('lobby-logs');
+      if (chats && chats.length > 0) {
+        lobbyLogs.innerHTML = '';
+        chats.forEach(chat => {
+          const div = document.createElement('div');
+          div.style.wordBreak = 'break-all';
+          div.innerHTML = `<span style="font-weight: bold; color: var(--accent-blue);">${chat.player_name}:</span> ${chat.message}`;
+          lobbyLogs.appendChild(div);
+        });
+        lobbyLogs.scrollTop = lobbyLogs.scrollHeight;
       }
     }
+
+    window.moveToRoom = async function(roomId) {
+      await supabase
+        .from('players')
+        .update({ current_room_id: roomId })
+        .eq('id', playerId);
+      window.location.href = `vtt.html?room=${roomId}`;
+    };
 
     // 5. 新規ルーム作成処理
     document.getElementById('create-room-btn').addEventListener('click', async () => {
@@ -163,7 +381,7 @@
 
       const { data, error } = await supabase
         .from('rooms')
-        .insert([{ name: roomName, host_id: playerId }])
+        .insert([{ name: roomName, current_gm_id: playerId }])
         .select()
         .single();
 
@@ -172,10 +390,29 @@
         return;
       }
 
-      window.location.href = `vtt.html?room=${data.id}`;
+      moveToRoom(data.id);
     });
 
-    fetchRooms();
+    // 6. チャット送信
+    const lobbyInput = document.getElementById('lobby-input');
+    const lobbySendBtn = document.getElementById('lobby-send-btn');
+
+    async function sendLobbyMessage() {
+      const text = lobbyInput.value.trim();
+      if (!text) return;
+
+      await supabase.from('lobby_chats').insert([{ player_name: playerName, message: text }]);
+      lobbyInput.value = '';
+      fetchLobbyData();
+    }
+
+    lobbySendBtn.addEventListener('click', sendLobbyMessage);
+    lobbyInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendLobbyMessage();
+    });
+
+    fetchLobbyData();
+    setInterval(fetchLobbyData, 5000);
   </script>
 </body>
 </html>
