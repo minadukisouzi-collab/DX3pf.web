@@ -132,7 +132,7 @@
       <div class="auth-header">
         <span class="title-logo" style="font-size: 1.2rem;">DX3rd VTT - 出発ロビー</span>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <!-- 自動ログアウト時間設定プルダウン（無効なし、最長120分） -->
+          <!-- 自動ログアウト時間設定 -->
           <select id="timeout-setting" title="自動ログアウト時間" style="background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 6px; font-size: 0.75rem; cursor: pointer;">
             <option value="15">自動: 15分</option>
             <option value="30">自動: 30分</option>
@@ -203,7 +203,7 @@
       document.getElementById('welcome-msg').textContent = `プレイヤー: ${playerName} さん`;
     }
 
-    // 1. ログイン状態の初期化 & 定期的な生存確認（ハートビート）
+    // 1. ログイン状態の初期化 & 定期的な生存確認
     async function updatePresence() {
       await supabase
         .from('players')
@@ -218,13 +218,12 @@
     updatePresence();
     const heartbeatInterval = setInterval(updatePresence, 5000);
 
-    // 2. ユーザー設定可能な自動ログアウト & 延長モーダル制御（最長120分、無効化なし）
+    // 2. 自動ログアウトタイマー
     const timeoutSelect = document.getElementById('timeout-setting');
     const logoutModal = document.getElementById('logout-modal');
     const extendBtn = document.getElementById('extend-btn');
     const forceLogoutBtn = document.getElementById('force-logout-btn');
 
-    // 保存された設定を反映（デフォルトは120分）
     const savedTimeout = localStorage.getItem('idle_timeout_min');
     if (savedTimeout !== null) {
       timeoutSelect.value = savedTimeout;
@@ -239,39 +238,31 @@
       const delayMs = minutes * 60 * 1000;
 
       idleTimer = setTimeout(() => {
-        // 時間が来たらモーダルを表示
         logoutModal.style.display = 'flex';
-
-        // モーダル表示後、さらに60秒間応答がなければ強制的にログアウト
         clearTimeout(countdownTimer);
         countdownTimer = setTimeout(async () => {
           alert('操作がなかったため、自動ログアウトしました。');
           await performLogout();
-        }, 60000); // 猶予1分
-
+        }, 60000);
       }, delayMs);
     }
 
-    // 設定変更時の保存とタイマー再起動
     timeoutSelect.addEventListener('change', () => {
       localStorage.setItem('idle_timeout_min', timeoutSelect.value);
       startIdleTimer();
     });
 
-    // 「延長する」ボタンを押したときの処理
     extendBtn.addEventListener('click', () => {
       clearTimeout(countdownTimer);
       logoutModal.style.display = 'none';
-      startIdleTimer(); // タイマーをリセットして再スタート
+      startIdleTimer();
     });
 
-    // 「今すぐログアウト」ボタンを押したときの処理
     forceLogoutBtn.addEventListener('click', async () => {
       clearTimeout(countdownTimer);
       await performLogout();
     });
 
-    // ユーザーの操作（マウス、キーボード、クリックなど）でタイマーをリセット
     ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
       window.addEventListener(event, () => {
         if (logoutModal.style.display !== 'flex') {
@@ -280,7 +271,7 @@
       });
     });
 
-    startIdleTimer(); // 初期起動
+    startIdleTimer();
 
     async function performLogout() {
       clearInterval(heartbeatInterval);
@@ -313,8 +304,9 @@
       setTheme(htmlTag.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
 
-    // 4. ルーム一覧 & ロビーメンバー & チャットの同期取得
+    // 4. データ同期（ルーム一覧・メンバー・チャット）
     async function fetchLobbyData() {
+      // ルーム一覧
       const roomListUl = document.getElementById('room-list');
       const { data: rooms } = await supabase.from('rooms').select('*').order('created_at', { ascending: false });
 
@@ -333,6 +325,7 @@
         });
       }
 
+      // ロビーメンバー
       const memberListUl = document.getElementById('member-list');
       const { data: members } = await supabase
         .from('players')
@@ -352,17 +345,27 @@
         });
       }
 
-      const { data: chats } = await supabase.from('lobby_chats').select('*').order('created_at', { ascending: true }).limit(40);
+      // ★ 変更点：ロビーチャットの送り先を既存の chat_log テーブル (session_id = 'lobby') に統一
+      const { data: chats, error: chatError } = await supabase
+        .from('chat_log')
+        .select('*')
+        .eq('session_id', 'lobby')
+        .order('created_at', { ascending: true })
+        .limit(40);
+
       const lobbyLogs = document.getElementById('lobby-logs');
-      if (chats && chats.length > 0) {
+      if (!chatError && chats && chats.length > 0) {
         lobbyLogs.innerHTML = '';
         chats.forEach(chat => {
           const div = document.createElement('div');
           div.style.wordBreak = 'break-all';
-          div.innerHTML = `<span style="font-weight: bold; color: var(--accent-blue);">${chat.player_name}:</span> ${chat.message}`;
+          // chat_log テーブルの構造 (speaker_name, message) に合わせています
+          div.innerHTML = `<span style="font-weight: bold; color: var(--accent-blue);">${chat.speaker_name}:</span> ${chat.message}`;
           lobbyLogs.appendChild(div);
         });
         lobbyLogs.scrollTop = lobbyLogs.scrollHeight;
+      } else if (!chats || chats.length === 0) {
+        lobbyLogs.innerHTML = `<div style="color: var(--text-muted); text-align: center; font-size: 0.75rem; margin-top: 10px;">まだメッセージはありません</div>`;
       }
     }
 
@@ -393,7 +396,7 @@
       moveToRoom(data.id);
     });
 
-    // 6. チャット送信
+    // 6. ロビーチャット送信処理（chat_log テーブルの session_id = 'lobby' に保存）
     const lobbyInput = document.getElementById('lobby-input');
     const lobbySendBtn = document.getElementById('lobby-send-btn');
 
@@ -401,16 +404,33 @@
       const text = lobbyInput.value.trim();
       if (!text) return;
 
-      await supabase.from('lobby_chats').insert([{ player_name: playerName, message: text }]);
+      const { error } = await supabase
+        .from('chat_log')
+        .insert([
+          { 
+            session_id: 'lobby', 
+            speaker_name: playerName, 
+            message: text 
+          }
+        ]);
+
+      if (error) {
+        alert('送信エラー: ' + error.message);
+        return;
+      }
+
       lobbyInput.value = '';
-      fetchLobbyData();
+      fetchLobbyData(); // 送信後すぐに再取得して反映
     }
 
     lobbySendBtn.addEventListener('click', sendLobbyMessage);
     lobbyInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendLobbyMessage();
+      if (e.key === 'Enter') {
+        sendLobbyMessage();
+      }
     });
 
+    // 初期実行 & 定期ポーリング
     fetchLobbyData();
     setInterval(fetchLobbyData, 5000);
   </script>
