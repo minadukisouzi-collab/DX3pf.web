@@ -83,11 +83,20 @@ function renderChatLogs() {
   logsContainer.scrollTop = logsContainer.scrollHeight;
 }
 
-// 4. メッセージ送信 ＆ ダイスロール判定 ＆ Supabase保存
 export async function sendMessage() {
   const input = document.getElementById('chat-input');
   const speakerSelect = document.getElementById('chat-speaker-select');
-  if (!input || !input.value.trim() || !supabaseInstance || !currentSessionId) return;
+
+  // デバッグ用：何が足りていないか画面上で確認する
+  if (!currentSessionId) {
+    alert('エラー: currentSessionId が取得できていません');
+    return;
+  }
+  if (!input || !input.value.trim()) return;
+  if (!supabaseInstance) {
+    alert('エラー: supabaseInstance が初期化されていません');
+    return;
+  }
   
   const text = input.value.trim();
   const speaker = speakerSelect ? speakerSelect.value : 'GM';
