@@ -1,40 +1,56 @@
 // ==========================================
-// chat.js: チャットシステム・タブ切替・ダイスロール処理（Supabase連携版）
+// chat.js: チャットシステム・タブ切替・ダイスロール処理（モジュール版）
 // ==========================================
 
 let currentTab = 'main';
-let currentSessionId = 'test01'; // 動的に変更可能なセッションID
+let currentSessionId = null; // 固着を防止するため初期値は null
+let supabaseInstance = null;
 
 let chatLogsData = {
-  main: [{ speaker: '[SYSTEM]', text: 'メインスレッドへようこそ。ダイス例: 8dx+2@8' }],
+  main: [{ speaker: '[SYSTEM]', text: 'スレッドへようこそ。ダイス例: 8dx+2@8' }],
   sub:  [{ speaker: '[SYSTEM]', text: '雑談スレッドです。自由にお使いください。' }],
   info: [{ speaker: '[SYSTEM]', text: '情報スレッドです。ハンドアウトや共有情報を管理します。' }]
 };
 
 let isChatCollapsed = false;
 
-// 0. 外部（vtt.html等）からセッションID（ルームID）をセットする関数
-function setChatSession(sessionId) {
-  if (sessionId) {
-    currentSessionId = sessionId;
+// 0. チャットシステムの初期化（vtt.html から Supabaseインスタンス、ルームID、プレイヤー名を受け取る）
+export function initChatSystem(supabaseClient, roomId, playerName) {
+  if (!supabaseClient || !roomId) {
+    console.error('チャット初期化エラー: SupabaseクライアントまたはルームIDが不足しています。');
+    return;
   }
+  
+  supabaseInstance = supabaseClient;
+  currentSessionId = roomId;
+
+  // スピーカーセレクトに自分の名前とGMをセット
+  const speakerSelect = document.getElementById('chat-speaker-select');
+  if (speakerSelect && playerName) {
+    speakerSelect.innerHTML = `<option value="${playerName}">${playerName}</option><option value="GM">GM</option>`;
+  }
+
+  // 過去ログの取得とリアルタイム購読の開始
+  loadInitialChatLogs();
+  subscribeToChatRealtime();
 }
 
 // 1. チャットタブ切替
-function switchChatTab(tabKey) {
+export function switchChatTab(tabKey) {
   currentTab = tabKey;
   const tabs = document.querySelectorAll('.chat-tab');
   tabs.forEach(t => t.classList.remove('active'));
   
-  const activeIdx = tabKey === 'main' ? 0 : (tabKey === 'sub' ? 1 : 2);
-  if (tabs[activeIdx]) tabs[activeIdx].classList.add('active');
+  // タブのインデックスに合わせたアクティブ切替
+  const tabArray = Array.from(tabs);
+  const targetTab = tabArray.find(t => t.getAttribute('onclick')?.includes(tabKey));
+  if (targetTab) targetTab.classList.add('active');
 
-  if (isChatCollapsed) toggleChatPanel();
   renderChatLogs();
 }
 
 // 2. チャットパネルの折りたたみトグル
-function toggleChatPanel() {
+export function toggleChatPanel() {
   isChatCollapsed = !isChatCollapsed;
   const wrapper = document.getElementById('chat-wrapper');
   const toggleBtn = document.getElementById('chat-toggle-btn');
@@ -71,10 +87,10 @@ function renderChatLogs() {
 }
 
 // 4. メッセージ送信 ＆ ダイスロール判定 ＆ Supabaseへの保存
-async function sendMessage() {
+export async function sendMessage() {
   const input = document.getElementById('chat-input');
   const speakerSelect = document.getElementById('chat-speaker-select');
-  if (!input || !input.value.trim()) return;
+  if (!input || !input.value.trim() || !supabaseInstance || !currentSessionId) return;
   
   const text = input.value.trim();
   const speaker = speakerSelect ? speakerSelect.value : 'GM';
@@ -103,31 +119,26 @@ async function sendMessage() {
   input.value = '';
 
   // 現在のルームのセッションIDを使ってSupabaseへ送信（INSERT）する
-  if (window.supabaseClient) {
-    const { error } = await window.supabaseClient
-      .from('chat_log')
-      .insert([
-        { 
-          session_id: currentSessionId, 
-          speaker_name: speaker, 
-          message: messageToSend 
-        }
-      ]);
+  const { error } = await supabaseInstance
+    .from('chat_log')
+    .insert([
+      { 
+        session_id: currentSessionId, 
+        speaker_name: speaker, 
+        message: messageToSend 
+      }
+    ]);
 
-    if (error) {
-      console.error('Supabase送信エラー:', error);
-    }  
-  } else {
-    appendLogToTab(currentTab, speaker, messageToSend);
+  if (error) {
+    console.error('Supabase送信エラー:', error);
   }
 }
 
-// 初期化：過去のログをSupabaseから取得して画面に描画する
-async function loadInitialChatLogs(sessionId) {
-  if (sessionId) currentSessionId = sessionId;
-  if (!window.supabaseClient) return;
+// 5. 初期化：過去のログをSupabaseから取得して画面に描画する
+async function loadInitialChatLogs() {
+  if (!supabaseInstance || !currentSessionId) return;
 
-  const { data, error } = await window.supabaseClient
+  const { data, error } = await supabaseInstance
     .from('chat_log')
     .select('*')
     .eq('session_id', currentSessionId)
@@ -139,27 +150,21 @@ async function loadInitialChatLogs(sessionId) {
   }
 
   if (data && data.length > 0) {
-    chatLogsData[currentTab] = data.map(item => ({
+    chatLogsData['main'] = data.map(item => ({
       speaker: item.speaker_name,
       text: item.message
     }));
   } else {
-    // ログが一件もない場合は空にする
-    chatLogsData[currentTab] = [];
+    chatLogsData['main'] = [];
   }
   renderChatLogs();
 }
 
-// リアルタイム受信の設定
-function subscribeToChat(sessionId) {
-  if (sessionId) currentSessionId = sessionId;
-  if (!window.supabaseClient) return;
+// 6. リアルタイム受信の設定
+function subscribeToChatRealtime() {
+  if (!supabaseInstance || !currentSessionId) return;
 
-  // 最初に過去ログを取得する
-  loadInitialChatLogs(currentSessionId);
-
-  // リアルタイム変更を監視（現在のセッションIDに一致するものだけ）
-  window.supabaseClient
+  supabaseInstance
     .channel(`chat-room-${currentSessionId}`)
     .on(
       'postgres_changes',
@@ -171,7 +176,11 @@ function subscribeToChat(sessionId) {
       },
       (payload) => {
         const newLog = payload.new;
-        appendLogToTab(currentTab, newLog.speaker_name, newLog.message);
+        chatLogsData['main'].push({
+          speaker: newLog.speaker_name,
+          text: newLog.message
+        });
+        renderChatLogs();
       }
     )
     .subscribe((status) => {
@@ -179,17 +188,7 @@ function subscribeToChat(sessionId) {
     });
 }
 
-function appendLogToTab(tabKey, speaker, text) {
-  if (!chatLogsData[tabKey]) chatLogsData[tabKey] = [];
-  chatLogsData[tabKey].push({ speaker, text });
-  if (tabKey === currentTab) renderChatLogs();
-}
-
-function appendLog(speaker, text) {
-  appendLogToTab('main', speaker, text);
-}
-
-// 6. DX3rd 特有のクリティカルエフェクト＆スプリードを含むダイスロールエンジン
+// 7. ダイスロールエンジン (DX3rd)
 function rollDX3(num, mod, crit) {
   let cur = num, hist = [], total = 0, rerolls = 0;
   if (crit < 2) crit = 2;
@@ -213,7 +212,7 @@ function rollDX3(num, mod, crit) {
   return { total: total, detail: hist.join(' -> ') + (mod ? ` + ${mod}` : '') };
 }
 
-// 一般的な d10 ダイスロール用エンジン
+// 8. ダイスロールエンジン (一般d10)
 function rollD10(num, mod) {
   let rolls = [];
   let sum = 0;
