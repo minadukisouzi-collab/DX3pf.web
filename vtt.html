@@ -32,7 +32,7 @@
 
     <!-- ② ダークモード / ライトモード切り替えボタン -->
     <div style="display: flex; align-items: center;">
-      <button class="theme-toggle" id="toggle-theme" style="background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">ライトモード</button>
+      <button class="theme-toggle" id="toggle-theme" style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">ライトモード</button>
     </div>
   </header>
 
@@ -358,7 +358,7 @@
       window.location.href = 'rooms.html';
     });
 
-        // ② ダークモード / ライトモード切り替え機能
+    // ② ダークモード / ライトモード切り替え機能
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
 
@@ -366,18 +366,15 @@
       htmlTag.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
 
+      // クラスを付け替えてボタンの色と文字を確実に制御
       if (theme === 'dark') {
-        // ダークモード表示のときはボタンを「黒（暗い背景色）」に設定
         toggleBtn.textContent = 'ライトモード';
-        toggleBtn.style.background = '#131722';
-        toggleBtn.style.color = '#edf2f4';
-        toggleBtn.style.borderColor = '#2a2f3a';
+        toggleBtn.classList.remove('light-btn');
+        toggleBtn.classList.add('dark-btn');
       } else {
-        // ライトモード表示のときはボタンを「白（明るい背景色）」に設定
         toggleBtn.textContent = 'ダークモード';
-        toggleBtn.style.background = '#ffffff';
-        toggleBtn.style.color = '#131722';
-        toggleBtn.style.borderColor = '#cccccc';
+        toggleBtn.classList.remove('dark-btn');
+        toggleBtn.classList.add('light-btn');
       }
     }
 
