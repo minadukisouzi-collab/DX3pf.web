@@ -258,8 +258,13 @@
     </div>
   </div>
 </div>
+<!-- 各種ロジック用JavaScriptファイルの読み込み（main.js はモジュールとして読み込み） -->
+  <script type="module" src="main.js"></script>
+  <script src="effects.js"></script>
+  <script src="battle.js"></script>
+  <script src="board.js"></script>
 
-  <!-- チャットおよびルーム固有ロジック（修正完了版） -->
+  <!-- チャットおよびルーム固有ロジック（モジュール版） -->
   <script type="module">
     import { supabase } from './config.js';
     import { initChatSystem, switchChatTab, toggleChatPanel, sendMessage } from './chat.js';
@@ -288,8 +293,6 @@
     };
 
     window.toggleChatPanel = toggleChatPanel;
-    
-    // 💡 HTMLの onclick="sendMessage()" から呼び出せるようにグローバル登録
     window.sendMessage = sendMessage;
 
     // ① URLパラメータからルームID（UUID）を確実に取得
@@ -308,7 +311,7 @@
       window.location.href = 'rooms.html';
     }
 
-    // 💡 逆引きをせず、URLの roomId（UUID）をそのままチャットのセッションIDとして引き渡す
+    // 💡 URLの roomId（UUID）をそのままチャットのセッションIDとして引き渡す
     initChatSystem(supabase, roomId, playerName);
 
     // ルームメンバーリストの取得関数
