@@ -1,10 +1,10 @@
 // ==========================================
-// chat.js: チャットシステム・タブ切替・ダイスロール処理（通常スクリプト版）
+// chat.js: チャットシステム・タブ切替・ダイスロール処理（モジュール版）
 // ==========================================
 
 let currentTab = 'main';
-let currentSessionId = null; 
-let supabaseClientInstance = null;
+let currentSessionId = null; // ルームの id (rooms.id) が入る
+let supabaseInstance = null;
 
 let chatLogsData = {
   main: [{ speaker: '[SYSTEM]', text: 'スレッドへようこそ。ダイス例: 8dx+2@8' }],
@@ -15,14 +15,14 @@ let chatLogsData = {
 let isChatCollapsed = false;
 
 // 0. チャットシステムの初期化（vtt.html から呼ばれる）
-function initChatSystem(supabaseClient, roomId, playerName) {
+export function initChatSystem(supabaseClient, roomId, playerName) {
   if (!supabaseClient || !roomId) {
     console.error('チャット初期化エラー: SupabaseまたはルームIDが不足しています。');
     return;
   }
   
-  supabaseClientInstance = supabaseClient;
-  currentSessionId = roomId;
+  supabaseInstance = supabaseClient;
+  currentSessionId = roomId; // rooms.id をセッションIDとして保持
 
   const speakerSelect = document.getElementById('chat-speaker-select');
   if (speakerSelect && playerName) {
@@ -34,7 +34,7 @@ function initChatSystem(supabaseClient, roomId, playerName) {
 }
 
 // 1. チャットタブ切替
-function switchChatTab(tabKey) {
+export function switchChatTab(tabKey) {
   currentTab = tabKey;
   const tabs = document.querySelectorAll('.chat-tab');
   tabs.forEach(t => t.classList.remove('active'));
@@ -47,7 +47,7 @@ function switchChatTab(tabKey) {
 }
 
 // 2. チャットパネルの折りたたみトグル
-function toggleChatPanel() {
+export function toggleChatPanel() {
   isChatCollapsed = !isChatCollapsed;
   const wrapper = document.getElementById('chat-wrapper');
   const toggleBtn = document.getElementById('chat-toggle-btn');
@@ -84,10 +84,10 @@ function renderChatLogs() {
 }
 
 // 4. メッセージ送信 ＆ ダイスロール判定 ＆ Supabase保存
-async function sendMessage() {
+export async function sendMessage() {
   const input = document.getElementById('chat-input');
   const speakerSelect = document.getElementById('chat-speaker-select');
-  if (!input || !input.value.trim() || !supabaseClientInstance || !currentSessionId) return;
+  if (!input || !input.value.trim() || !supabaseInstance || !currentSessionId) return;
   
   const text = input.value.trim();
   const speaker = speakerSelect ? speakerSelect.value : 'GM';
@@ -113,7 +113,8 @@ async function sendMessage() {
 
   input.value = '';
 
-  const { error } = await supabaseClientInstance
+  // session_id に rooms.id を入れて保存
+  const { error } = await supabaseInstance
     .from('chat_log')
     .insert([
       { 
@@ -128,11 +129,11 @@ async function sendMessage() {
   }
 }
 
-// 5. 過去ログ取得
+// 5. 過去ログ取得（rooms.id と一致する session_id のみを抽出）
 async function loadInitialChatLogs() {
-  if (!supabaseClientInstance || !currentSessionId) return;
+  if (!supabaseInstance || !currentSessionId) return;
 
-  const { data, error } = await supabaseClientInstance
+  const { data, error } = await supabaseInstance
     .from('chat_log')
     .select('*')
     .eq('session_id', currentSessionId)
@@ -156,9 +157,9 @@ async function loadInitialChatLogs() {
 
 // 6. リアルタイム購読
 function subscribeToChatRealtime() {
-  if (!supabaseClientInstance || !currentSessionId) return;
+  if (!supabaseInstance || !currentSessionId) return;
 
-  supabaseClientInstance
+  supabaseInstance
     .channel(`chat-room-${currentSessionId}`)
     .on(
       'postgres_changes',
