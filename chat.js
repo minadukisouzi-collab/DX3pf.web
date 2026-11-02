@@ -83,18 +83,17 @@ function renderChatLogs() {
   logsContainer.scrollTop = logsContainer.scrollHeight;
 }
 
-// 4. メッセージ送信（完全動作版）
+// 4. メッセージ送信（重複解消版）
 export async function sendMessage() {
   const input = document.getElementById('chat-input');
   const speakerSelect = document.getElementById('chat-speaker-select');
 
-  // ガード条件のチェック
   if (!currentSessionId) {
     alert('【エラー】currentSessionId が取得できていません');
     return;
   }
   if (!input || !input.value.trim()) {
-    return; // 入力値が空の場合は何もしない
+    return;
   }
   if (!supabaseInstance) {
     alert('【エラー】supabaseInstance が初期化されていません');
@@ -105,21 +104,8 @@ export async function sendMessage() {
   const speaker = speakerSelect ? speakerSelect.value : 'GM';
   let messageToSend = text;
 
-  // ローカル画面への即時描画
-  if (!chatLogsData[currentTab]) {
-    chatLogsData[currentTab] = [];
-  }
-  chatLogsData[currentTab].push({
-    speaker: speaker,
-    text: messageToSend
-  });
-  renderChatLogs();
-  input.value = '';
+  input.value = ''; // 先に入力欄をクリア
 
-  // -------------------------------------------------------------------------
-  // 【ステップ2】ダイス判定とSupabase送信を有効化
-  // -------------------------------------------------------------------------
-  
   // ダイス判定 (DX3rd & d10)
   const diceMatch = text.match(/^(\d+)dx(?:\+(\d+))?(?:@(\d+))?$/i);
   if (diceMatch) {
@@ -138,7 +124,7 @@ export async function sendMessage() {
     }
   }
 
-  // session_id に rooms.id (UUID) を入れてSupabaseに保存
+  // Supabaseへ保存（保存されるとリアルタイム購読経由で画面に1回だけ描画されます）
   const { error } = await supabaseInstance
     .from('chat_log')
     .insert([
@@ -154,7 +140,6 @@ export async function sendMessage() {
     alert('Supabase送信エラー: ' + JSON.stringify(error));
   }
 }
-
 
 // 5. 過去ログ取得（rooms.id と一致する session_id のみを抽出）
 async function loadInitialChatLogs() {
