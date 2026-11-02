@@ -311,8 +311,25 @@
       window.location.href = 'rooms.html';
     }
 
-    // チャットシステムへ固有のルームIDを確実に引き渡して初期化
-    initChatSystem(supabase, roomId, playerName);
+    // 💡 roomsテーブルのUUIDからルーム名(name)を逆引きしてチャットセッションIDに合わせる処理
+    async function initSession() {
+      let chatSessionId = roomId; // 万が一取得できなかった場合のフォールバック
+
+      const { data: roomData, error } = await supabase
+        .from('rooms')
+        .select('name')
+        .eq('id', roomId)
+        .single();
+
+      if (!error && roomData && roomData.name) {
+        chatSessionId = roomData.name; // 例: "test01" などのルーム名を取得
+      }
+
+      // チャットシステムへ確定したセッションIDを引き渡して初期化
+      initChatSystem(supabase, chatSessionId, playerName);
+    }
+
+    initSession();
 
     // ルームメンバーリストの取得関数
     async function fetchRoomMembers() {
