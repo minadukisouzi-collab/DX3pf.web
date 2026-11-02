@@ -259,16 +259,10 @@
   </div>
 </div>
 
-  <!-- スクリプトの分割読み込み（依存関係の順） -->
-  <script src="main.js"></script>     <!-- 共通変数、キャラクター管理、初期化など -->
-  <script src="effects.js"></script>  <!-- エフェクト関連、逆引き辞書、登録モーダルなど -->
-  <script src="battle.js"></script>   <!-- フェーズ・戦闘プロセス管理など -->
-  <script src="board.js"></script>    <!-- トークン移動、マップのズーム・パンなど -->
-  
-  <!-- チャットおよびルーム固有ロジック（モジュール構造維持版） -->
+  <!-- チャットおよびルーム固有ロジック（修正完了版） -->
   <script type="module">
     import { supabase } from './config.js';
-    import { initChatSystem, switchChatTab, toggleChatPanel } from './chat.js';
+    import { initChatSystem, switchChatTab, toggleChatPanel, sendMessage } from './chat.js';
 
     // グローバル公開（HTMLの onclick から呼び出すため）
     window.switchChatTab = function(tabKey) {
@@ -294,8 +288,11 @@
     };
 
     window.toggleChatPanel = toggleChatPanel;
+    
+    // 💡 HTMLの onclick="sendMessage()" から呼び出せるようにグローバル登録
+    window.sendMessage = sendMessage;
 
-    // ① ルームIDの固着問題解消：URLパラメータからルームIDを確実に取得
+    // ① URLパラメータからルームID（UUID）を確実に取得
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get('room');
     const playerId = localStorage.getItem('player_id');
@@ -311,25 +308,8 @@
       window.location.href = 'rooms.html';
     }
 
-    // 💡 roomsテーブルのUUIDからルーム名(name)を逆引きしてチャットセッションIDに合わせる処理
-    async function initSession() {
-      let chatSessionId = roomId; // 万が一取得できなかった場合のフォールバック
-
-      const { data: roomData, error } = await supabase
-        .from('rooms')
-        .select('name')
-        .eq('id', roomId)
-        .single();
-
-      if (!error && roomData && roomData.name) {
-        chatSessionId = roomData.name; // 例: "test01" などのルーム名を取得
-      }
-
-      // チャットシステムへ確定したセッションIDを引き渡して初期化
-      initChatSystem(supabase, roomId, playerName);
-    }
-
-    initSession();
+    // 💡 逆引きをせず、URLの roomId（UUID）をそのままチャットのセッションIDとして引き渡す
+    initChatSystem(supabase, roomId, playerName);
 
     // ルームメンバーリストの取得関数
     async function fetchRoomMembers() {
@@ -375,7 +355,7 @@
       window.location.href = 'rooms.html';
     });
 
-    // ② ダークモード / ライトモード切り替え機能の横展開
+    // ② ダークモード / ライトモード切り替え機能
     const htmlTag = document.documentElement;
     const toggleBtn = document.getElementById('toggle-theme');
 
