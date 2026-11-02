@@ -1,13 +1,11 @@
-// Supabaseの接続情報
-const SUPABASE_URL = 'https://iraddangbcsovgjiihzz.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Wo_OFiMCNAqVG1snXLOD_A_B_v_8GS_'; // API Settingsから取得したanonキー
+// ==========================================
+// main.js: 共通データ定義・全体初期化・キャラクター管理（config.js 連携版）
+// ==========================================
+
+import { supabase } from './config.js';
 
 // 全ファイル共通で使えるようグローバル変数として保持
-window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ==========================================
-// main.js: 共通データ定義・全体初期化・キャラクター管理
-// ==========================================
+window.supabaseClient = supabase;
 
 const ALL_BAD_STATUSES = [
   { id: 'hard', name: '硬直', type: 'type-hard' },
@@ -179,17 +177,12 @@ function closeModal() {
   const modal = document.getElementById('gm-modal');
   if (modal) modal.classList.remove('active'); 
 }
-// main.js の一番下に追記
-document.addEventListener('DOMContentLoaded', () => {
-  // リアルタイム受信の開始
-  if (typeof subscribeToChat === 'function') {
-    subscribeToChat('test01');
-  }
-});
-// アプリ起動時にチャットのリアルタイム受信をスタートする
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof subscribeToChat === 'function') {
-    subscribeToChat('test01');
-    console.log('チャットのリアルタイム同期を開始しました');
-  }
-});
+
+// ==========================================
+// HTMLの onclick から呼び出せるようにグローバル公開（モジュール対策）
+// ==========================================
+window.renderCharacters = renderCharacters;
+window.updateStat = updateStat;
+window.addCharacter = addCharacter;
+window.openGMModal = openGMModal;
+window.closeModal = closeModal;
