@@ -1,5 +1,5 @@
 // ==========================================
-// board.js: マップボードの操作（パン・ズーム） ＆ トークン管理
+// board.js: マップボードの操作（パン・ズーム） ＆ トークン管理（スマホタッチ対応版）
 // ==========================================
 
 let boardState = { scale: 1, panX: 0, panY: 0, isDragging: false, startX: 0, startY: 0 };
@@ -14,21 +14,22 @@ function initBoardPanAndZoom() {
   const viewport = document.getElementById('board-viewport');
   if (!wrapper || !viewport) return;
 
-  wrapper.addEventListener('mousedown', (e) => {
+  wrapper.addEventListener('pointerdown', (e) => {
     if (e.target !== wrapper && e.target !== viewport) return;
     boardState.isDragging = true;
     boardState.startX = e.clientX - boardState.panX;
     boardState.startY = e.clientY - boardState.panY;
+    wrapper.setPointerCapture(e.pointerId);
   });
 
-  window.addEventListener('mousemove', (e) => {
+  window.addEventListener('pointermove', (e) => {
     if (!boardState.isDragging) return;
     boardState.panX = e.clientX - boardState.startX;
     boardState.panY = e.clientY - boardState.startY;
     updateBoardTransform();
   });
 
-  window.addEventListener('mouseup', () => { 
+  window.addEventListener('pointerup', (e) => { 
     boardState.isDragging = false; 
   });
 }
@@ -52,7 +53,7 @@ function updateBoardTransform() {
   }
 }
 
-// 2. トークンの描画 ＆ ドラッグ移動処理
+// 2. トークンの描画 ＆ ドラッグ移動処理（ポインターイベント対応）
 function renderTokens() {
   const viewport = document.getElementById('board-viewport');
   if (!viewport) return;
@@ -72,14 +73,16 @@ function renderTokens() {
     
     let dragging = false, ox = 0, oy = 0;
     
-    el.addEventListener('mousedown', (e) => {
-      e.stopPropagation(); 
+    el.addEventListener('pointerdown', (e) => {
+      e.stopPropagation(); // ボード全体のドラッグが暴発するのを防ぐ
+      e.preventDefault();  // スマホでの余計なスクロールや選択を防ぐ
       dragging = true;
       ox = (e.clientX / boardState.scale) - t.x;
       oy = (e.clientY / boardState.scale) - t.y;
+      el.setPointerCapture(e.pointerId); // 指やマウスが要素から外れても追従させる
     });
     
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener('pointermove', (e) => {
       if (!dragging) return;
       t.x = (e.clientX / boardState.scale) - ox;
       t.y = (e.clientY / boardState.scale) - oy;
@@ -87,7 +90,7 @@ function renderTokens() {
       el.style.top = `${t.y}px`;
     });
     
-    window.addEventListener('mouseup', () => { 
+    window.addEventListener('pointerup', (e) => { 
       dragging = false; 
     });
     
