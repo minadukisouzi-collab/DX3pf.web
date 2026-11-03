@@ -97,10 +97,3 @@ function renderTokens() {
     viewport.appendChild(el);
   });
 }
-
-/* ボード全体やビューポート、トークンでのブラウザのデフォルトタッチ動作（スクロール等）を無効化する */
-#board-wrapper,
-#board-viewport,
-.token {
-  touch-action: none;
-}
