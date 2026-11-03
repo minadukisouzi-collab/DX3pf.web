@@ -70,8 +70,17 @@ header {
 .bs-badge.type-berserk { border-color: var(--accent-red); font-weight: bold; }
 
 #center-right-area { flex: 1; display: flex; flex-direction: column; position: relative; height: 100%; overflow: hidden; }
+
 #board-wrapper { flex: 1; position: relative; background: var(--bg-main); overflow: hidden; cursor: grab; }
+
 #board-viewport { position: absolute; top: 0; left: 0; width: 2000px; height: 2000px; transform-origin: 0 0; background-image: radial-gradient(var(--border-color) 1px, transparent 1px); background-size: 40px 40px; }
+
+/* ボード全体やビューポート、トークンでのブラウザのデフォルトタッチ動作（スクロール等）を無効化する */
+#board-wrapper,
+#board-viewport,
+.token {
+  touch-action: none;
+}
 
 .token { position: absolute; cursor: move; display: flex; flex-direction: column; align-items: center; z-index: 2; }
 .token-name { background: rgba(0,0,0,0.75); color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; margin-top: 2px; white-space: nowrap; }
